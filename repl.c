@@ -16,8 +16,8 @@ void lisp_repl(LispContext *ctx, FILE *in, FILE *out) {
     LISP_REF(input);
     //fprintf(stderr, "-- START EVAL --\n");
     output = lisp_evaluate(input, ctx);
-    LISP_UNREF(input);
     LISP_REF(output);
+    LISP_UNREF(input);
     //fprintf(stderr, "-- START PRINT --\n");
     lisp_print_expression(output, out);
     LISP_UNREF(output);
