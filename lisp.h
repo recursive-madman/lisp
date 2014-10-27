@@ -15,6 +15,8 @@ typedef enum _LispExpressionType {
 
 extern char *lisp_type_names[LISP_TYPE_MAX];
 
+#define LispTypeName(expression)                \
+  lisp_type_names[expression->type]
 
 typedef LispExpression *(*LispFunction)(LispExpression *args,
                                         LispContext *ctx);
@@ -70,8 +72,7 @@ LispExpression *make_lisp_cons(LispCons cons);
 LispExpression *make_lisp_quote(LispExpression *quoted);
 LispExpression *make_lisp_function(LispFunction function);
 
-#define LispTypeName(expression)                \
-  lisp_type_names[expression->type]
+void destroy_lisp(LispExpression *exp);
 
 // parser
 LispExpression *lisp_parse(char *source);

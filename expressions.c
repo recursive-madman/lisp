@@ -11,6 +11,28 @@ char *lisp_type_names[LISP_TYPE_MAX] = {
   "nil", "symbol", "number", "string", "cons", "quote", "function"
 };
 
+void destroy_lisp(LispExpression *exp) {
+  switch(exp->type) {
+  case LISP_SYMBOL:
+    free(exp->value.symbol);
+    break;
+  case LISP_STRING:
+    free(exp->value.string.ptr);
+    break;
+  case LISP_CONS:
+    // FIXME: this can free potentially used expressions!
+    destroy_lisp(CAR(exp));
+    destroy_lisp(CDR(exp));
+    break;
+  case LISP_QUOTE:
+    destroy_lisp(exp->value.quoted);
+    break;
+  default:
+    // no value to free.
+  }
+  free(exp);
+}
+
 LispExpression *make_lisp_nil() {
   MakeLisp(NIL, nil, NULL);
 }
