@@ -9,7 +9,9 @@
 
 LispExpression *lisp_evaluate(LispExpression *expression,
                               LispContext *ctx) {
-  if(expression->type == LISP_QUOTE) {
+  if(NULL == expression) {
+    return NULL;
+  } if(expression->type == LISP_QUOTE) {
     return expression->value.quoted;
   } else if(expression->type == LISP_CONS) {
     LispExpression *left = expression->value.cons.left;
