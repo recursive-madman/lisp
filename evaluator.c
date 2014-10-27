@@ -37,3 +37,15 @@ LispExpression *lisp_evaluate(LispExpression *expression,
     return expression;
   }
 }
+
+
+/* LispExpression *lisp_evaluate(LispExpression *expression, */
+/*                               LispContext *ctx) { */
+/*   fprintf(stderr, "EVAL:\n  "); */
+/*   lisp_print_expression(expression, stderr); */
+/*   fprintf(stderr, "\nTO:\n  "); */
+/*   LispExpression *result = _lisp_evaluate(expression, ctx); */
+/*   lisp_print_expression(result, stderr); */
+/*   fprintf(stderr, "\n"); */
+/*   return result; */
+/* } */
