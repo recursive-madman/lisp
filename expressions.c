@@ -1,8 +1,13 @@
 
 #include "lisp.h"
 
+int lisp_count = 0;
+
 #define MakeLisp(lisp_type, name, val)          \
   Allocate(LispExpression, expression);         \
+  fprintf(stderr, "CREATE " __STRING(lisp_type) \
+          " (0x%x)\n", (int)expression);        \
+  lisp_count++;                                 \
   expression->type = LISP_ ## lisp_type;        \
   expression->value.name = val;                 \
   return expression;
@@ -12,6 +17,10 @@ char *lisp_type_names[LISP_TYPE_MAX] = {
 };
 
 void destroy_lisp(LispExpression *exp) {
+  fprintf(stderr, "DESTROY ");
+  lisp_count--;
+  lisp_print_expression(exp, stderr);
+  fprintf(stderr, " (0x%x)\n", (int)exp);
   switch(exp->type) {
   case LISP_SYMBOL:
     free(exp->value.symbol);
@@ -20,15 +29,15 @@ void destroy_lisp(LispExpression *exp) {
     free(exp->value.string.ptr);
     break;
   case LISP_CONS:
-    // FIXME: this can free potentially used expressions!
-    destroy_lisp(CAR(exp));
-    destroy_lisp(CDR(exp));
+    LISP_UNREF(CAR(exp));
+    LISP_UNREF(CDR(exp));
     break;
   case LISP_QUOTE:
-    destroy_lisp(exp->value.quoted);
+    LISP_UNREF(exp->value.quoted);
     break;
   default:
     // no value to free.
+    break;
   }
   free(exp);
 }
@@ -49,14 +58,18 @@ LispExpression *make_lisp_symbol(char *symbol) {
   MakeLisp(SYMBOL, symbol, symbol);
 }
 
-LispExpression *make_lisp_cons(LispCons cons) {
+LispExpression *make_lisp_cons(LispExpression *left, LispExpression *right) {
+  LispCons cons = { left, right };
+  LISP_REF(left);
+  LISP_REF(right);
   MakeLisp(CONS, cons, cons);
 }
 
 LispExpression *make_lisp_quote(LispExpression *quoted) {
+  LISP_REF(quoted);
   MakeLisp(QUOTE, quoted, quoted);
 }
 
 LispExpression *make_lisp_function(LispFunction function) {
-  MakeLisp(QUOTE, function, function);
+  MakeLisp(FUNCTION, function, function);
 }

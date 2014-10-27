@@ -47,14 +47,13 @@ DeclareType(LispParseContext, {
 LispExpression *lisp_parse_expression(LispParseContext *ctx);
 
 LispExpression *lisp_parse_list(LispParseContext *ctx) {
-  LispCons cons;
-  cons.left = lisp_parse_expression(ctx);
+  LispExpression *left, *right;
+  left = lisp_parse_expression(ctx);
   SKIP_WHITESPACE(ctx);
   ASSERT_NO_EOF(ctx);
-  cons.right = (*ctx->source == ')') ?
-    make_lisp_nil() :
+  right = (*ctx->source == ')') ? make_lisp_nil() :
     lisp_parse_list(ctx);
-  return make_lisp_cons(cons);
+  return make_lisp_cons(left, right);
 }
 
 LispExpression *lisp_parse_string(LispParseContext *ctx) {

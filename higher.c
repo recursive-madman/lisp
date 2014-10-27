@@ -6,10 +6,7 @@ LispExpression *lisp_map(LispExpression *list, LispFunction mapper,
   if(list->type == LISP_NIL) {
     return list;
   } else {
-    LispCons cons = {
-      mapper(CAR(list), ctx),
-      lisp_map(CDR(list), mapper, ctx)
-    };
-    return make_lisp_cons(cons);
+    return make_lisp_cons(mapper(CAR(list), ctx),
+                          lisp_map(CDR(list), mapper, ctx));
   }
 }

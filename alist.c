@@ -18,7 +18,7 @@ LispExpression *lisp_alist_find(LispExpression *alist, char *symbol) {
 
 LispExpression *lisp_alist_add(LispExpression *alist, char *symbol,
                                LispExpression *value) {
-  LispCons cell = { make_lisp_symbol(symbol), value };
-  LispCons list = { make_lisp_cons(cell), alist };
-  return make_lisp_cons(list);
+  return make_lisp_cons(make_lisp_cons(make_lisp_symbol(symbol),
+                                       value),
+                        alist);
 }

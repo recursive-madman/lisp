@@ -32,6 +32,7 @@ typedef LispExpression *(*LispFunction)(LispExpression *args,
 
 #define CAR(cell) cell->value.cons.left
 #define CDR(cell) cell->value.cons.right
+#define CADR(cell) CAR(CDR(cell))
 
 DeclareType(LispString, {
     char *ptr;
@@ -56,6 +57,7 @@ DeclareUnion(LispExpressionValue, {
 DeclareType(LispExpression, {
     LispExpressionType type;
     LispExpressionValue value;
+    int ref;
   });
 
 DeclareType(LispContext, {
@@ -63,12 +65,25 @@ DeclareType(LispContext, {
     LispExpression *functions;
   });
 
+#define LISP_REF(expr) \
+  expr->ref++;                                            \
+  fprintf(stderr, "REF 0x%x (%d)\n", (int)expr, expr->ref)
+
+#define LISP_UNREF(expr)                        \
+  expr->ref--;                                  \
+  fprintf(stderr, "UNREF 0x%x (%d)\n", (int)expr, expr->ref); \
+  if(expr->ref == 0) {                          \
+    destroy_lisp(expr);                         \
+  }
+
+extern int lisp_count; // number of allocated objects.
+
 // expressions
 LispExpression *make_lisp_nil();
 LispExpression *make_lisp_number(int number);
 LispExpression *make_lisp_string(LispString string);
 LispExpression *make_lisp_symbol(char *symbol);
-LispExpression *make_lisp_cons(LispCons cons);
+LispExpression *make_lisp_cons(LispExpression *left, LispExpression *right);
 LispExpression *make_lisp_quote(LispExpression *quoted);
 LispExpression *make_lisp_function(LispFunction function);
 

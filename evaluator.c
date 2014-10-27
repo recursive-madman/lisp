@@ -23,8 +23,12 @@ LispExpression *lisp_evaluate(LispExpression *expression,
     if(NULL == f) {
       EvalError("Function not defined: %s", left->value.symbol);
     } else {
-      return f(lisp_map(expression->value.cons.right,
-                        lisp_evaluate, ctx), ctx);
+      LispExpression *args = lisp_map(expression->value.cons.right,
+                                      lisp_evaluate, ctx);
+      LISP_REF(args);
+      LispExpression *result = f(args, ctx);
+      LISP_UNREF(args);
+      return result;
     }
   } else if(expression->type == LISP_SYMBOL) {
     LispExpression *value = lisp_alist_find(ctx->variables, expression->value.symbol);
