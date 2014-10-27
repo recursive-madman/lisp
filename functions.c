@@ -44,6 +44,14 @@ LISP_F(cdr) {
   return CDR(c);
 }
 
+LISP_F(set) {
+  LispExpression *s = CAR(args);
+  LispExpression *v = CAR(CDR(args));
+  LISP_ASSERT_TYPE(s, LISP_SYMBOL);
+  ctx->variables = lisp_alist_add(ctx->variables, s->value.symbol, v);
+  return v;
+};
+
 void lisp_install_functions(LispContext *ctx) {
   lisp_context_declare_function(ctx, "+", lisp_f_add);
   lisp_context_declare_function(ctx, "-", lisp_f_sub);
@@ -52,4 +60,5 @@ void lisp_install_functions(LispContext *ctx) {
   lisp_context_declare_function(ctx, "cons", lisp_f_cons);
   lisp_context_declare_function(ctx, "car", lisp_f_car);
   lisp_context_declare_function(ctx, "cdr", lisp_f_cdr);
+  lisp_context_declare_function(ctx, "set", lisp_f_set);
 }
