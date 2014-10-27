@@ -14,7 +14,6 @@ LispContext *lisp_context_create() {
 
 void lisp_context_declare_function(LispContext *ctx, char *symbol,
                                    LispFunction function) {
-  fprintf(stderr, "Declare function %s\n", symbol);
   LispExpression *old_functions = ctx->functions;
   ctx->functions = lisp_alist_add(old_functions, strdup(symbol),
                                   make_lisp_function(function));

@@ -5,8 +5,8 @@ int lisp_count = 0;
 
 #define MakeLisp(lisp_type, name, val)          \
   Allocate(LispExpression, expression);         \
-  fprintf(stderr, "CREATE " __STRING(lisp_type) \
-          " (0x%x)\n", (int)expression);        \
+  LISP_MDBG("CREATE " __STRING(lisp_type)         \
+            " (0x%x)\n", (int)expression);        \
   lisp_count++;                                 \
   expression->type = LISP_ ## lisp_type;        \
   expression->value.name = val;                 \
@@ -17,10 +17,12 @@ char *lisp_type_names[LISP_TYPE_MAX] = {
 };
 
 void destroy_lisp(LispExpression *exp) {
+# ifdef LISP_DEBUG_MEMORY
   fprintf(stderr, "DESTROY ");
-  lisp_count--;
   lisp_print_expression(exp, stderr);
   fprintf(stderr, " (0x%x)\n", (int)exp);
+# endif
+  lisp_count--;
   switch(exp->type) {
   case LISP_SYMBOL:
     free(exp->value.symbol);

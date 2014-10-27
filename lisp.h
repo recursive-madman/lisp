@@ -5,6 +5,12 @@
 
 #include <declaration.h>
 
+#ifdef LISP_DEBUG_MEMORY
+# define LISP_MDBG(...) fprintf(stderr, __VA_ARGS__)
+#else
+# define LISP_MDBG(...)
+#endif
+
 typedef struct _LispExpression LispExpression;
 typedef struct _LispContext LispContext;
 
@@ -67,13 +73,13 @@ DeclareType(LispContext, {
 #define LISP_REF(expr)                                        \
   if(NULL != expr) {                                          \
     expr->ref++;                                              \
-    fprintf(stderr, "REF 0x%x (%d)\n", (int)expr, expr->ref); \
+    LISP_MDBG("REF 0x%x (%d)\n", (int)expr, expr->ref);       \
   }
 
 #define LISP_UNREF(expr)                                        \
   if(NULL != expr) {                                            \
     expr->ref--;                                                \
-    fprintf(stderr, "UNREF 0x%x (%d)\n", (int)expr, expr->ref); \
+    LISP_MDBG("UNREF 0x%x (%d)\n", (int)expr, expr->ref);       \
     if(expr->ref == 0) {                                        \
       destroy_lisp(expr);                                       \
     }                                                           \
