@@ -3,7 +3,7 @@
 
 LispExpression *lisp_map(LispExpression *list, LispFunction mapper,
                          LispContext *ctx) {
-  if(list->type == LISP_NIL) {
+  if(list == NULL) {
     return list;
   } else {
     return make_lisp_cons(mapper(CAR(list), ctx),

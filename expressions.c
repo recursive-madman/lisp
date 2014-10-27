@@ -13,7 +13,7 @@ int lisp_count = 0;
   return expression;
 
 char *lisp_type_names[LISP_TYPE_MAX] = {
-  "nil", "symbol", "number", "string", "cons", "quote", "function"
+  "symbol", "number", "string", "cons", "quote", "function"
 };
 
 void destroy_lisp(LispExpression *exp) {
@@ -40,10 +40,6 @@ void destroy_lisp(LispExpression *exp) {
     break;
   }
   free(exp);
-}
-
-LispExpression *make_lisp_nil() {
-  MakeLisp(NIL, nil, NULL);
 }
 
 LispExpression *make_lisp_number(int number) {

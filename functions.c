@@ -11,7 +11,7 @@ char *strdup(char*);
 
 #define LISP_F_ARITHMETIC(name, op)                               \
   int _lisp_f_ ## name (LispExpression *args, LispContext *ctx) { \
-    if(args->type == LISP_NIL) {                                  \
+    if(NULL == args) {                                            \
       return 0;                                                   \
     } else {                                                      \
       LispExpression *n = CAR(args);                              \
@@ -53,11 +53,12 @@ LISP_F(set) {
 };
 
 int lisp_eq(LispExpression *a, LispExpression *b) {
-  if(a->type == b->type) {
+  if(a == NULL && b == NULL) {
+    return 1;
+  } else if(a == NULL || b == NULL) {
+    return 0;
+  } else if(a->type == b->type) {
     switch(a->type) {
-    case LISP_NIL:
-      return 1;
-      break;
     case LISP_SYMBOL:
       if(strcmp(a->value.symbol, b->value.symbol) == 0) {
         return 1;
@@ -88,7 +89,7 @@ int lisp_eq(LispExpression *a, LispExpression *b) {
 LISP_F(eq) {
   return lisp_eq(CAR(args), CADR(args)) ?
     make_lisp_symbol(strdup("t")) :
-    make_lisp_nil();
+    NULL;
 };
 
 void lisp_install_functions(LispContext *ctx) {

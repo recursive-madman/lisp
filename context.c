@@ -7,10 +7,8 @@
 
 LispContext *lisp_context_create() {
   Allocate(LispContext, ctx);
-  ctx->variables = make_lisp_nil();
-  ctx->functions = make_lisp_nil();
-  LISP_REF(ctx->variables);
-  LISP_REF(ctx->functions);
+  ctx->variables = NULL;
+  ctx->functions = NULL;
   return ctx;
 }
 

@@ -2,7 +2,7 @@
 #include "lisp.h"
 
 LispExpression *lisp_alist_find(LispExpression *alist, char *symbol) {
-  if(alist->type == LISP_NIL) {
+  if(NULL == alist) {
     return NULL;
   } else {
     LISP_ASSERT_TYPE(alist, LISP_CONS);

@@ -51,7 +51,7 @@ LispExpression *lisp_parse_list(LispParseContext *ctx) {
   left = lisp_parse_expression(ctx);
   SKIP_WHITESPACE(ctx);
   ASSERT_NO_EOF(ctx);
-  right = (*ctx->source == ')') ? make_lisp_nil() :
+  right = (*ctx->source == ')') ? NULL :
     lisp_parse_list(ctx);
   return make_lisp_cons(left, right);
 }
@@ -117,7 +117,7 @@ LispExpression *lisp_parse_expression(LispParseContext *ctx) {
   char c = *ctx->source;
   switch(c) {
   case 0:
-    return make_lisp_nil();
+    return NULL;
   case '\n':
     ADVANCE_LINE(ctx);
     break;

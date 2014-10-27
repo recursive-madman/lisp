@@ -4,10 +4,11 @@
 #include "lisp.h"
 
 void lisp_print_expression(LispExpression *expression, FILE *stream) {
-  switch(expression->type) {
-  case LISP_NIL:
+  if(expression == NULL) {
     fputs("nil", stream);
-    break;
+    return;
+  }
+  switch(expression->type) {
   case LISP_SYMBOL:
     fputs(expression->value.symbol, stream);
     break;
