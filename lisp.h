@@ -1,5 +1,4 @@
 
-
 #ifndef LISP_H
 #define LISP_H
 
@@ -40,11 +39,6 @@ typedef LispExpression *(*LispFunction)(LispExpression *args,
 #define CDR(cell) cell->value.cons.right
 #define CADR(cell) CAR(CDR(cell))
 
-DeclareType(LispString, {
-    char *ptr;
-    unsigned int len;
-  });
-
 DeclareType(LispCons, {
     LispExpression *left;
     LispExpression *right;
@@ -53,7 +47,7 @@ DeclareType(LispCons, {
 DeclareUnion(LispExpressionValue, {
     int number;
     char *symbol;
-    LispString string;
+    char *string;
     LispCons cons;
     LispExpression *quoted;
     LispFunction function;
@@ -89,11 +83,13 @@ extern int lisp_count; // number of allocated objects.
 
 // expressions
 LispExpression *make_lisp_number(int number);
-LispExpression *make_lisp_string(LispString string);
+LispExpression *make_lisp_string(char *string);
 LispExpression *make_lisp_symbol(char *symbol);
 LispExpression *make_lisp_cons(LispExpression *left, LispExpression *right);
 LispExpression *make_lisp_quote(LispExpression *quoted);
 LispExpression *make_lisp_function(LispFunction function);
+
+int lisp_eq(LispExpression *a, LispExpression *b);
 
 void destroy_lisp(LispExpression *exp);
 

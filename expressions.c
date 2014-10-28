@@ -28,7 +28,7 @@ void destroy_lisp(LispExpression *exp) {
     free(exp->value.symbol);
     break;
   case LISP_STRING:
-    free(exp->value.string.ptr);
+    free(exp->value.string);
     break;
   case LISP_CONS:
     LISP_UNREF(CAR(exp));
@@ -48,7 +48,7 @@ LispExpression *make_lisp_number(int number) {
   MakeLisp(NUMBER, number, number);
 }
 
-LispExpression *make_lisp_string(LispString string) {
+LispExpression *make_lisp_string(char *string) {
   MakeLisp(STRING, string, string);
 }
 
@@ -70,4 +70,39 @@ LispExpression *make_lisp_quote(LispExpression *quoted) {
 
 LispExpression *make_lisp_function(LispFunction function) {
   MakeLisp(FUNCTION, function, function);
+}
+
+
+int lisp_eq(LispExpression *a, LispExpression *b) {
+  if(a == NULL && b == NULL) {
+    return 1;
+  } else if(a == NULL || b == NULL) {
+    return 0;
+  } else if(a->type == b->type) {
+    switch(a->type) {
+    case LISP_SYMBOL:
+      if(strcmp(a->value.symbol, b->value.symbol) == 0) {
+        return 1;
+      }
+      break;
+    case LISP_STRING:
+      if(strcmp(a->value.string, b->value.string) == 0) {
+        return 1;
+      }
+      break;
+    case LISP_NUMBER:
+      if(a->value.number == b->value.number) {
+        return 1;
+      } break;
+    case LISP_CONS:
+      return lisp_eq(a->value.cons.left, b->value.cons.left) &&
+        lisp_eq(a->value.cons.right, b->value.cons.right);
+    case LISP_QUOTE:
+      return lisp_eq(a->value.quoted, b->value.quoted);
+    default:
+      // rest never happens.
+      break;
+    }
+  }
+  return 0;
 }

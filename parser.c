@@ -47,6 +47,9 @@ DeclareType(LispParseContext, {
 LispExpression *lisp_parse_expression(LispParseContext *ctx);
 
 LispExpression *lisp_parse_list(LispParseContext *ctx) {
+  if(*ctx->source == ')') {
+    return NULL;
+  }
   LispExpression *left, *right;
   left = lisp_parse_expression(ctx);
   SKIP_WHITESPACE(ctx);
@@ -56,22 +59,30 @@ LispExpression *lisp_parse_list(LispParseContext *ctx) {
   return make_lisp_cons(left, right);
 }
 
+#define StringParseSetup(name)                  \
+  int name ## _prealloc = 8, name ## _len = 0;  \
+  char *name = malloc(name ## _prealloc)
+#define StringParseChar(name, c) name[name ## _len++] = c
+#define StringParseCheck(name)                  \
+  if(name ## _len == name ## _prealloc) {       \
+    name ## _prealloc *= 2;                     \
+    name = realloc(name, name ## _prealloc);    \
+  }
+#define StringParseDone(name)                   \
+  name = realloc(name, name ## _len + 1);       \
+  name[name ## _len] = 0
+
 LispExpression *lisp_parse_string(LispParseContext *ctx) {
   int escape = 0;
-  int prealloc = 8;
-  LispString string;
-  string.ptr = malloc(prealloc);
+  StringParseSetup(string);
   while(*ctx->source != '"' || escape) {
-    string.ptr[string.len++] = *ctx->source;
+    ASSERT_NO_EOF(ctx);
+    StringParseChar(string, *ctx->source);
     escape = (*ctx->source == '\\' && !escape) ? 1 : 0;
     ADVANCE(ctx);
-    if(string.len == prealloc) {
-      prealloc *= 2;
-      string.ptr = realloc(string.ptr, prealloc);
-    }
+    StringParseCheck(string);
   }
-  string.ptr = realloc(string.ptr, string.len + 1);
-  string.ptr[string.len] = 0;
+  StringParseDone(string);
   return make_lisp_string(string);
 }
 
@@ -86,31 +97,16 @@ LispExpression *lisp_parse_number(LispParseContext *ctx) {
 }
 
 LispExpression *lisp_parse_symbol(LispParseContext *ctx) {
-  int prealloc = 8;
-  char *symbol = malloc(prealloc);
-  int len = 0;
-  char c;
-  for(;;){
-    c = *ctx->source;
-    if(c == '\n') {
-      ADVANCE_LINE(ctx);
-    } else if(c == ' ') {
-      ADVANCE(ctx);
-    } else if(c == 0 || c == ')') {
-      // don't advance. caller needs to see this.
-    } else {
-      symbol[len++] = c;
-      if(len == prealloc) {
-        prealloc *= 2;
-        symbol = realloc(symbol, prealloc);
-      }
-      ADVANCE(ctx);
-      continue;
-    }
-    symbol = realloc(symbol, len + 1);
-    symbol[len] = 0;
-    return make_lisp_symbol(symbol);
+  StringParseSetup(symbol);
+  ;
+  for(char c = *ctx->source; c != 0 && c != ')' && c != ' ' && c != '\n';
+      c = *ctx->source) {
+    StringParseChar(symbol, c);
+    StringParseCheck(symbol);
+    ADVANCE(ctx);
   }
+  StringParseDone(symbol);
+  return make_lisp_symbol(symbol);
 }
 
 LispExpression *lisp_parse_expression(LispParseContext *ctx) {
