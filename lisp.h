@@ -130,6 +130,8 @@ void lisp_throw(LispExpression *exc);
 
 // alist
 LispExpression *lisp_alist_find(LispExpression *alist, char *symbol);
+LispExpression *lisp_alist_find_novoid(LispExpression *alist, char *symbol,
+                                       int *is_void);
 LispExpression *lisp_alist_add(LispExpression *alist, char *symbol,
                                LispExpression *value);
 void alist_inspect(LispExpression *alist, FILE *stream);

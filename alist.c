@@ -5,8 +5,9 @@
 
 #include "lisp.h"
 
-LispExpression *lisp_alist_find(LispExpression *alist, char *symbol) {
+LispExpression *lisp_alist_find_novoid(LispExpression *alist, char *symbol, int *is_void) {
   if(NULL == alist) {
+    *is_void = 1;
     return NULL;
   } else {
     LISP_ASSERT_TYPE(alist, LISP_CONS);
@@ -15,9 +16,14 @@ LispExpression *lisp_alist_find(LispExpression *alist, char *symbol) {
     if(strcmp(symbol, left.left->value.symbol) == 0) {
       return left.right;
     } else {
-      return lisp_alist_find(cons.right, symbol);
+      return lisp_alist_find_novoid(cons.right, symbol, is_void);
     }
   }
+}
+
+LispExpression *lisp_alist_find(LispExpression *alist, char *symbol) {
+  int is_void = 0; // ignored...
+  return lisp_alist_find_novoid(alist, symbol, &is_void);
 }
 
 void alist_inspect(LispExpression *alist, FILE *stream) {
