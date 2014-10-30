@@ -49,12 +49,9 @@ LispExpression *lisp_evaluate(LispExpression *expression,
                                     lisp_evaluate, ctx);
     LISP_REF(args);
     LispExpression *f_expr = lisp_context_find(ctx, left->value.symbol);
-    if(NULL == f_expr) {
-      LISP_UNREF(args);
-      EvalError("Symbol is void: %s", left->value.symbol);
-    } else if(f_expr->type != LISP_FUNCTION) {
-      EvalError("Symbol %s isn't set to a function!",
-                left->value.symbol);
+    if(NULL == f_expr || f_expr->type != LISP_FUNCTION) {
+      EvalError("Symbol %s isn't set to a function (type: %s)!",
+                left->value.symbol, LispTypeName(f_expr));
     }
     LispFunction f = f_expr->value.function;
     lisp_trace_push(left->value.symbol);
