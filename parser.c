@@ -61,13 +61,15 @@ LispExpression *lisp_parse_list(LispParseContext *ctx) {
   return make_lisp_cons(left, right);
 }
 
+#define PREALLOC 8
+
 #define StringParseSetup(name)                  \
-  int name ## _prealloc = 8, name ## _len = 0;  \
+  int name ## _prealloc = PREALLOC, name ## _len = 0; \
   char *name = malloc(name ## _prealloc)
 #define StringParseChar(name, c) name[name ## _len++] = c
 #define StringParseCheck(name)                  \
   if(name ## _len == name ## _prealloc) {       \
-    name ## _prealloc *= 2;                     \
+    name ## _prealloc += PREALLOC;              \
       name = realloc(name, name ## _prealloc);  \
   }
 #define StringParseDone(name)                   \
