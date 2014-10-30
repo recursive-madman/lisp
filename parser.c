@@ -96,6 +96,11 @@ LispExpression *lisp_parse_number(LispParseContext *ctx) {
     number += *ctx->source - '0';
     ADVANCE(ctx);
   }
+  if(*ctx->source && *ctx->source != ' ' &&
+     *ctx->source != '\n' && *ctx->source != ')') {
+    ParseError("Unexpected symbol '%c' (0x%x), expected one of ' ', '\\n', ')', EOF\n",
+               *ctx->source, *ctx->source);
+  }
   return make_lisp_number(number);
 }
 
