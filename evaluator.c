@@ -3,9 +3,13 @@
 #include <string.h>
 #include "lisp.h"
 
-#define EvalError(...)                                              \
-  lisp_throw(make_lisp_exception("EvaluationError", __VA_ARGS__));  \
+#define LispThrow(name, ...)                                        \
+  lisp_throw(make_lisp_exception(name, __VA_ARGS__));               \
   return NULL /* never reached */
+
+
+#define EvalError(...)                                              \
+  LispThrow("EvaluationError", __VA_ARGS__)
 
 char *lisp_trace[1024];
 int lisp_trace_index = 0;
@@ -39,7 +43,7 @@ LispExpression *lisp_evaluate(LispExpression *expression,
       left = lisp_evaluate(left, ctx);
     }
     if(left->type != LISP_SYMBOL) {
-      EvalError("Expected symbol, got %s", LispTypeName(left));
+      LispThrow("TypeError", "Expected symbol, got %s", LispTypeName(left));
     }
     LispExpression *args = lisp_map(expression->value.cons.right,
                                     lisp_evaluate, ctx);
@@ -70,7 +74,6 @@ void lisp_throw(LispExpression *exc) {
   lisp_current_exception = exc;
   longjmp(lisp_exc_env, 1);
 }
-
 
 /* LispExpression *lisp_evaluate(LispExpression *expression, */
 /*                               LispContext *ctx) { */
