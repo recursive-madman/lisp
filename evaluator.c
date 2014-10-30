@@ -41,9 +41,9 @@ LispExpression *lisp_evaluate(LispExpression *expression,
     if(left->type != LISP_SYMBOL) {
       EvalError("Expected symbol, got %s", LispTypeName(left));
     }
-    LispFunction f = lisp_context_find_function(ctx, left->value.symbol);
     LispExpression *args = lisp_map(expression->value.cons.right,
                                     lisp_evaluate, ctx);
+    LispFunction f = lisp_context_find_function(ctx, left->value.symbol);
     LISP_REF(args);
     if(NULL == f) {
       LISP_UNREF(args);
