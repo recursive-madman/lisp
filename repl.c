@@ -19,6 +19,7 @@ void lisp_repl(LispContext *ctx, FILE *in, FILE *out) {
     if(setjmp(lisp_exc_env)) {
       LISP_UNREF(input);
       lisp_print_expression(lisp_current_exception, out);
+      lisp_trace_index = 0;
       LISP_UNREF(lisp_current_exception);
       PROMPT(out);
       continue;
