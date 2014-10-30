@@ -4,8 +4,15 @@
 
 #include <declaration.h>
 
+extern int mdbg_depth;
+
 #ifdef LISP_DEBUG_MEMORY
-# define LISP_MDBG(...) fprintf(stderr, __VA_ARGS__)
+# define LISP_MDBG(...) {                       \
+    for(int _mdb=0;_mdb<mdbg_depth;_mdb++) {    \
+      fprintf(stderr, "  ");                    \
+    }                                           \
+    fprintf(stderr, __VA_ARGS__);               \
+  }
 #else
 # define LISP_MDBG(...)
 #endif
@@ -21,7 +28,7 @@ typedef enum _LispExpressionType {
 extern char *lisp_type_names[LISP_TYPE_MAX];
 
 #define LispTypeName(expression)                \
-  lisp_type_names[expression->type]
+  (expression ? lisp_type_names[expression->type] : "nil")
 
 typedef LispExpression *(*LispFunction)(LispExpression *args,
                                         LispContext *ctx);
@@ -109,6 +116,7 @@ LispExpression *lisp_evaluate(LispExpression *expression,
 LispExpression *lisp_alist_find(LispExpression *alist, char *symbol);
 LispExpression *lisp_alist_add(LispExpression *alist, char *symbol,
                                LispExpression *value);
+void alist_inspect(LispExpression *alist, FILE *stream);
 
 // higher
 LispExpression *lisp_map(LispExpression *list, LispFunction mapper,

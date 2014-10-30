@@ -11,15 +11,18 @@ void lisp_repl(LispContext *ctx, FILE *in, FILE *out) {
   PROMPT(out);
   LispExpression *input, *output;
   while(NULL != fgets(buf, 1024, in)) {
-    //fprintf(stderr, "-- START PARSE --\n");
+    LISP_MDBG("-- START PARSE --\n");
     input = lisp_parse(buf);    
+    LISP_MDBG("-- END PARSE --\n");
     LISP_REF(input);
-    //fprintf(stderr, "-- START EVAL --\n");
+    LISP_MDBG("-- START EVAL --\n");
     output = lisp_evaluate(input, ctx);
+    LISP_MDBG("-- END EVAL --\n");
     LISP_REF(output);
     LISP_UNREF(input);
-    //fprintf(stderr, "-- START PRINT --\n");
+    LISP_MDBG("-- START PRINT --\n");
     lisp_print_expression(output, out);
+    LISP_MDBG("-- END PRINT --\n");
     LISP_UNREF(output);
     fprintf(out, "\n");
     PROMPT(out);

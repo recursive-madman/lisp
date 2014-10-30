@@ -1,7 +1,7 @@
 
-#include <string.h>
+#define _GNU_SOURCE
 
-char *strdup(char*);
+#include <string.h>
 
 #include "lisp.h"
 
@@ -48,7 +48,10 @@ LISP_F(set) {
   LispExpression *s = CAR(args);
   LispExpression *v = CAR(CDR(args));
   LISP_ASSERT_TYPE(s, LISP_SYMBOL);
-  ctx->variables = lisp_alist_add(ctx->variables, s->value.symbol, v);
+  LispExpression *old_variables = ctx->variables;
+  ctx->variables = lisp_alist_add(old_variables, s->value.symbol, v);
+  LISP_REF(ctx->variables);
+  LISP_UNREF(old_variables);
   return v;
 };
 
@@ -59,7 +62,19 @@ LISP_F(eq) {
 }
 
 LISP_F(eval) {
-  return lisp_evaluate(CAR(args), ctx);
+  if(args == NULL) {
+    return NULL;
+  } else {
+    return lisp_evaluate(CAR(args), ctx);
+  }
+}
+
+LISP_F(inspect_state) {
+  fprintf(stderr, "Variables:\n");
+  alist_inspect(ctx->variables, stderr);
+  fprintf(stderr, "Functions:\n");
+  alist_inspect(ctx->functions, stderr);
+  return NULL;
 }
 
 void lisp_install_functions(LispContext *ctx) {
@@ -73,4 +88,5 @@ void lisp_install_functions(LispContext *ctx) {
   lisp_context_declare_function(ctx, "set", lisp_f_set);
   lisp_context_declare_function(ctx, "eq", lisp_f_eq);
   lisp_context_declare_function(ctx, "eval", lisp_f_eval);
+  lisp_context_declare_function(ctx, "inspect-state", lisp_f_inspect_state);
 }

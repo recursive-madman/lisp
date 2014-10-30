@@ -1,4 +1,8 @@
 
+#define _GNU_SOURCE
+
+#include <string.h>
+
 #include "lisp.h"
 
 LispExpression *lisp_alist_find(LispExpression *alist, char *symbol) {
@@ -16,9 +20,31 @@ LispExpression *lisp_alist_find(LispExpression *alist, char *symbol) {
   }
 }
 
+void alist_inspect(LispExpression *alist, FILE *stream) {
+  if(NULL != alist) {
+    LispExpression *key = CAR(CAR(alist));
+    LispExpression *value = CDR(CAR(alist));
+    if(key->type != LISP_SYMBOL) {
+      fprintf(stream, " NO SYMBOL (but %s) -> ", LispTypeName(key));
+    } else {
+      fprintf(stream, " %s -> ", key->value.symbol);
+    }
+    lisp_print_expression(value, stream);
+    fputs("\n", stream);
+    alist_inspect(CDR(alist), stream);
+  }
+}
+
 LispExpression *lisp_alist_add(LispExpression *alist, char *symbol,
                                LispExpression *value) {
-  return make_lisp_cons(make_lisp_cons(make_lisp_symbol(symbol),
+  /* if(strcmp(CAR(CAR(alist))->value.symbol, symbol) == 0) { */
+  /*   // replace car? */
+  /* } else if(CDR(alist) == NULL) { */
+  /*   // append */
+  /* } else { */
+  /*   return lisp_alist_add(CDR(alist), symbol, value); */
+  /* } */
+  return make_lisp_cons(make_lisp_cons(make_lisp_symbol(strdup(symbol)),
                                        value),
                         alist);
 }

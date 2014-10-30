@@ -33,12 +33,7 @@ LispExpression *lisp_evaluate(LispExpression *expression,
       return result;
     }
   } else if(expression->type == LISP_SYMBOL) {
-    LispExpression *value = lisp_alist_find(ctx->variables, expression->value.symbol);
-    if(NULL == value) {
-      EvalError("Variable value is void: %s", expression->value.symbol);
-    } else {
-      return value;
-    }
+    return lisp_alist_find(ctx->variables, expression->value.symbol);
   } else {
     return expression;
   }

@@ -2,6 +2,7 @@
 #include "lisp.h"
 
 int lisp_count = 0;
+int mdbg_depth = 0;
 
 #define MakeLisp(lisp_type, name, val)          \
   Allocate(LispExpression, expression);         \
@@ -18,9 +19,10 @@ char *lisp_type_names[LISP_TYPE_MAX] = {
 
 void destroy_lisp(LispExpression *exp) {
 # ifdef LISP_DEBUG_MEMORY
-  fprintf(stderr, "DESTROY ");
+  LISP_MDBG("DESTROY ");
   lisp_print_expression(exp, stderr);
   fprintf(stderr, " (0x%x)\n", (int)exp);
+  mdbg_depth++;
 # endif
   lisp_count--;
   switch(exp->type) {
@@ -42,6 +44,8 @@ void destroy_lisp(LispExpression *exp) {
     break;
   }
   free(exp);
+  mdbg_depth--;
+  LISP_MDBG("DONE DESTROY 0x%x\n", (int)exp);
 }
 
 LispExpression *make_lisp_number(int number) {

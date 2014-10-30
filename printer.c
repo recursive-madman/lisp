@@ -16,7 +16,7 @@ void lisp_print_expression(LispExpression *expression, FILE *stream) {
     fprintf(stream, "%d", expression->value.number);
     break;
   case LISP_STRING:
-    fprintf(stream, "%s", expression->value.string);
+    fprintf(stream, "\"%s\"", expression->value.string);
     break;
   case LISP_CONS:
     fputc('(', stream);

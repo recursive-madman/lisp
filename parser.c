@@ -15,19 +15,21 @@ DeclareType(LispParseContext, {
 
 # define _ADVANCE(ctx)                          \
   ctx->source++
-# define ADVANCE(ctx)                           \
-  _ADVANCE(ctx);                                \
-  ctx->col++
-# define ADVANCE_LINE(ctx)                      \
-  _ADVANCE(ctx);                                \
-  ctx->line++;                                  \
-  ctx->col = 0
+# define ADVANCE(ctx) {                         \
+    _ADVANCE(ctx);                              \
+    ctx->col++;                                 \
+  }
+# define ADVANCE_LINE(ctx) {                    \
+    _ADVANCE(ctx);                              \
+    ctx->line++;                                \
+    ctx->col = 0;                               \
+  }
 
-#define ASSERT_NO_EOF(ctx) {                                      \
-    if(*ctx->source == 0) {                                       \
-      ParseError("Unexpected EOF at %d:%d (called from %s:%d)",   \
-                 ctx->line, ctx->col, __FILE__, __LINE__);        \
-    }                                                             \
+#define ASSERT_NO_EOF(ctx) {                                    \
+    if(*ctx->source == 0) {                                     \
+      ParseError("Unexpected EOF at %d:%d (called from %s:%d)", \
+                 ctx->line, ctx->col, __FILE__, __LINE__);      \
+    }                                                           \
   }
 
 #define SKIP_WHITESPACE(ctx) {                  \
@@ -66,7 +68,7 @@ LispExpression *lisp_parse_list(LispParseContext *ctx) {
 #define StringParseCheck(name)                  \
   if(name ## _len == name ## _prealloc) {       \
     name ## _prealloc *= 2;                     \
-    name = realloc(name, name ## _prealloc);    \
+      name = realloc(name, name ## _prealloc);  \
   }
 #define StringParseDone(name)                   \
   name = realloc(name, name ## _len + 1);       \
@@ -79,9 +81,10 @@ LispExpression *lisp_parse_string(LispParseContext *ctx) {
     ASSERT_NO_EOF(ctx);
     StringParseChar(string, *ctx->source);
     escape = (*ctx->source == '\\' && !escape) ? 1 : 0;
-    ADVANCE(ctx);
+    if(*ctx->source == '\n') ADVANCE_LINE(ctx) else ADVANCE(ctx);
     StringParseCheck(string);
   }
+  ADVANCE(ctx);
   StringParseDone(string);
   return make_lisp_string(string);
 }
