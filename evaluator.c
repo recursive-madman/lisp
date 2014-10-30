@@ -5,7 +5,7 @@
 
 #define EvalError(...)                                              \
   lisp_throw(make_lisp_exception("EvaluationError", __VA_ARGS__));  \
-  return NULL
+  return NULL /* never reached */
 
 char *lisp_trace[1024];
 int lisp_trace_index = 0;
@@ -43,20 +43,23 @@ LispExpression *lisp_evaluate(LispExpression *expression,
     }
     LispExpression *args = lisp_map(expression->value.cons.right,
                                     lisp_evaluate, ctx);
-    LispFunction f = lisp_context_find_function(ctx, left->value.symbol);
     LISP_REF(args);
-    if(NULL == f) {
+    LispExpression *f_expr = lisp_context_find(ctx, left->value.symbol);
+    if(NULL == f_expr) {
       LISP_UNREF(args);
-      EvalError("Function not defined: %s", left->value.symbol);
-    } else {
-      lisp_trace_push(left->value.symbol);
-      LispExpression *result = f(args, ctx);
-      LISP_UNREF(args);
-      lisp_trace_pop();
-      return result;
+      EvalError("Symbol is void: %s", left->value.symbol);
+    } else if(f_expr->type != LISP_FUNCTION) {
+      EvalError("Symbol %s isn't set to a function!",
+                left->value.symbol);
     }
+    LispFunction f = f_expr->value.function;
+    lisp_trace_push(left->value.symbol);
+    LispExpression *result = f(args, ctx);
+    LISP_UNREF(args);
+    lisp_trace_pop();
+    return result;
   } else if(expression->type == LISP_SYMBOL) {
-    return lisp_alist_find(ctx->variables, expression->value.symbol);
+    return lisp_context_find(ctx, expression->value.symbol);
   } else {
     return expression;
   }

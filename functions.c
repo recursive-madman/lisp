@@ -48,10 +48,10 @@ LISP_F(set) {
   LispExpression *s = CAR(args);
   LispExpression *v = CAR(CDR(args));
   LISP_ASSERT_TYPE(s, LISP_SYMBOL);
-  LispExpression *old_variables = ctx->variables;
-  ctx->variables = lisp_alist_add(old_variables, s->value.symbol, v);
-  LISP_REF(ctx->variables);
-  LISP_UNREF(old_variables);
+  LispExpression *old_symbols = ctx->symbols;
+  ctx->symbols = lisp_alist_add(old_symbols, s->value.symbol, v);
+  LISP_REF(ctx->symbols);
+  LISP_UNREF(old_symbols);
   return v;
 };
 
@@ -70,10 +70,8 @@ LISP_F(eval) {
 }
 
 LISP_F(inspect_state) {
-  fprintf(stderr, "Variables:\n");
-  alist_inspect(ctx->variables, stderr);
-  fprintf(stderr, "Functions:\n");
-  alist_inspect(ctx->functions, stderr);
+  fprintf(stderr, "Symbols:\n");
+  alist_inspect(ctx->symbols, stderr);
   return NULL;
 }
 

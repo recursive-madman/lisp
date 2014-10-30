@@ -7,26 +7,20 @@
 
 LispContext *lisp_context_create() {
   Allocate(LispContext, ctx);
-  ctx->variables = NULL;
-  ctx->functions = NULL;
+  ctx->symbols = NULL;
   return ctx;
 }
 
 void lisp_context_declare_function(LispContext *ctx, char *symbol,
                                    LispFunction function) {
-  LispExpression *old_functions = ctx->functions;
-  ctx->functions = lisp_alist_add(old_functions, strdup(symbol),
-                                  make_lisp_function(function));
-  LISP_UNREF(old_functions);
-  LISP_REF(ctx->functions);
+  LispExpression *old_symbols = ctx->symbols;
+  ctx->symbols = lisp_alist_add(old_symbols, strdup(symbol),
+                                make_lisp_function(function));
+  LISP_UNREF(old_symbols);
+  LISP_REF(ctx->symbols);
 }
 
-LispFunction lisp_context_find_function(LispContext *ctx, char *symbol) {
-  LispExpression *fun = lisp_alist_find(ctx->functions, symbol);
-  if(NULL != fun) {
-    return fun->value.function;
-  } else {
-    return NULL;
-  }
+LispExpression *lisp_context_find(LispContext *ctx, char *symbol) {
+  return lisp_alist_find(ctx->symbols, symbol);
 }
 

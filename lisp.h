@@ -82,8 +82,7 @@ DeclareType(LispExpression, {
   });
 
 DeclareType(LispContext, {
-    LispExpression *variables;
-    LispExpression *functions;
+    LispExpression *symbols; // this is an alist
   });
 
 #define LISP_REF(expr)                                        \
@@ -121,7 +120,7 @@ LispExpression *lisp_parse(char *source);
 
 // context
 LispContext *lisp_context_create();
-LispFunction lisp_context_find_function(LispContext *ctx, char *symbol);
+LispExpression *lisp_context_find(LispContext *ctx, char *symbol);
 void lisp_context_declare_function(LispContext *ctx, char *symbol,
                                    LispFunction function);
 // evaluator
