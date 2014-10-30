@@ -1,4 +1,6 @@
 
+#include <stdarg.h>
+
 #include "lisp.h"
 
 int lisp_count = 0;
@@ -14,7 +16,7 @@ int mdbg_depth = 0;
   return expression;
 
 char *lisp_type_names[LISP_TYPE_MAX] = {
-  "symbol", "number", "string", "cons", "quote", "function"
+  "symbol", "number", "string", "cons", "quote", "function", "exception"
 };
 
 void destroy_lisp(LispExpression *exp) {
@@ -109,4 +111,15 @@ int lisp_eq(LispExpression *a, LispExpression *b) {
     }
   }
   return 0;
+}
+
+LispExpression *make_lisp_exception(char *name, char *format, ...) {
+  va_list ap;
+  va_start(ap, format);
+  char *message = malloc(1024);
+  vsnprintf(message, 1024, format, ap);
+  va_end(ap);
+  message = realloc(message, strlen(message));
+  LispException exception = { name, message };
+  MakeLisp(EXCEPTION, exception, exception);
 }

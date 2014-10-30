@@ -32,7 +32,15 @@ void lisp_print_expression(LispExpression *expression, FILE *stream) {
   case LISP_FUNCTION:
     fprintf(stream, "<procedure@0x%x>", (int)expression->value.function);
     break;
-  case LISP_TYPE_MAX:
+  case LISP_EXCEPTION:
+    fprintf(stream, "Uncaught exception: %s (%s)\n",
+            expression->value.exception.message,
+            expression->value.exception.name);
+    for(int i = 0; i < lisp_trace_index; i++) {
+      fprintf(stream, "  in `%s'\n", lisp_trace[i]);
+    }
+    break;
+  default:
     // never reached.
     // (hopefully)
     break;

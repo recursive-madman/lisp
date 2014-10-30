@@ -16,6 +16,13 @@ void lisp_repl(LispContext *ctx, FILE *in, FILE *out) {
     LISP_MDBG("-- END PARSE --\n");
     LISP_REF(input);
     LISP_MDBG("-- START EVAL --\n");
+    if(setjmp(lisp_exc_env)) {
+      LISP_UNREF(input);
+      lisp_print_expression(lisp_current_exception, out);
+      LISP_UNREF(lisp_current_exception);
+      PROMPT(out);
+      continue;
+    }
     output = lisp_evaluate(input, ctx);
     LISP_MDBG("-- END EVAL --\n");
     LISP_REF(output);

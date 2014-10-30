@@ -1,11 +1,31 @@
 
+#define _GNU_SOURCE
+#include <string.h>
 #include "lisp.h"
 
-#define EvalError(...)                          \
-  fputs("Evaluation Error: ", stderr);          \
-  fprintf(stderr, __VA_ARGS__);                 \
-  fputs("\n", stderr);                          \
-  abort()
+#define EvalError(...)                                              \
+  lisp_throw(make_lisp_exception("EvaluationError", __VA_ARGS__));  \
+  return NULL
+
+char *lisp_trace[1024];
+int lisp_trace_index = 0;
+LispExpression *lisp_current_exception;
+
+jmp_buf lisp_exc_env;
+
+void lisp_trace_push(char *symbol) {
+  if(lisp_trace_index == 1023) {
+    lisp_throw(make_lisp_exception("StackError", "Stack level too deep!"));
+  }
+  lisp_trace[lisp_trace_index++] = strdup(symbol);
+}
+
+void lisp_trace_pop() {
+  if(lisp_trace_index == 0) {
+    lisp_throw(make_lisp_exception("StackError", "BUG: Stack underrun occured!"));
+  }
+  free(lisp_trace[--lisp_trace_index]);
+}
 
 LispExpression *lisp_evaluate(LispExpression *expression,
                               LispContext *ctx) {
@@ -22,14 +42,17 @@ LispExpression *lisp_evaluate(LispExpression *expression,
       EvalError("Expected symbol, got %s", LispTypeName(left));
     }
     LispFunction f = lisp_context_find_function(ctx, left->value.symbol);
+    LispExpression *args = lisp_map(expression->value.cons.right,
+                                    lisp_evaluate, ctx);
+    LISP_REF(args);
     if(NULL == f) {
+      LISP_UNREF(args);
       EvalError("Function not defined: %s", left->value.symbol);
     } else {
-      LispExpression *args = lisp_map(expression->value.cons.right,
-                                      lisp_evaluate, ctx);
-      LISP_REF(args);
+      lisp_trace_push(left->value.symbol);
       LispExpression *result = f(args, ctx);
       LISP_UNREF(args);
+      lisp_trace_pop();
       return result;
     }
   } else if(expression->type == LISP_SYMBOL) {
@@ -37,6 +60,12 @@ LispExpression *lisp_evaluate(LispExpression *expression,
   } else {
     return expression;
   }
+}
+
+void lisp_throw(LispExpression *exc) {
+  LISP_REF(exc);
+  lisp_current_exception = exc;
+  longjmp(lisp_exc_env, 1);
 }
 
 

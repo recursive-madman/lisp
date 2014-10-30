@@ -2,6 +2,8 @@
 #ifndef LISP_H
 #define LISP_H
 
+#include <setjmp.h>
+
 #include <declaration.h>
 
 extern int mdbg_depth;
@@ -22,7 +24,7 @@ typedef struct _LispContext LispContext;
 
 typedef enum _LispExpressionType {
   LISP_SYMBOL, LISP_NUMBER, LISP_STRING, LISP_CONS,
-  LISP_QUOTE, LISP_FUNCTION, LISP_TYPE_MAX
+  LISP_QUOTE, LISP_FUNCTION, LISP_EXCEPTION, LISP_TYPE_MAX
 } LispExpressionType;
 
 extern char *lisp_type_names[LISP_TYPE_MAX];
@@ -46,9 +48,21 @@ typedef LispExpression *(*LispFunction)(LispExpression *args,
 #define CDR(cell) cell->value.cons.right
 #define CADR(cell) CAR(CDR(cell))
 
+// exception handling
+extern jmp_buf lisp_exc_env;
+extern char *lisp_trace[];
+extern int lisp_trace_index;
+extern LispExpression *lisp_current_exception;
+
+
 DeclareType(LispCons, {
     LispExpression *left;
     LispExpression *right;
+  });
+
+DeclareType(LispException, {
+    char *name;
+    char *message;
   });
 
 DeclareUnion(LispExpressionValue, {
@@ -58,6 +72,7 @@ DeclareUnion(LispExpressionValue, {
     LispCons cons;
     LispExpression *quoted;
     LispFunction function;
+    LispException exception;
   });
 
 DeclareType(LispExpression, {
@@ -95,6 +110,7 @@ LispExpression *make_lisp_symbol(char *symbol);
 LispExpression *make_lisp_cons(LispExpression *left, LispExpression *right);
 LispExpression *make_lisp_quote(LispExpression *quoted);
 LispExpression *make_lisp_function(LispFunction function);
+LispExpression *make_lisp_exception(char *name, char *message, ...);
 
 int lisp_eq(LispExpression *a, LispExpression *b);
 
@@ -111,6 +127,7 @@ void lisp_context_declare_function(LispContext *ctx, char *symbol,
 // evaluator
 LispExpression *lisp_evaluate(LispExpression *expression,
                               LispContext *ctx);
+void lisp_throw(LispExpression *exc);
 
 // alist
 LispExpression *lisp_alist_find(LispExpression *alist, char *symbol);
