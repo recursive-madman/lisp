@@ -54,10 +54,21 @@ LispExpression *lisp_parse_list(LispParseContext *ctx) {
   }
   LispExpression *left, *right;
   left = lisp_parse_expression(ctx);
+  fprintf(stderr, "parse list left: ");
+  lisp_print_expression(left, stderr);
+  fprintf(stderr, "\n");
   SKIP_WHITESPACE(ctx);
   ASSERT_NO_EOF(ctx);
-  right = (*ctx->source == ')') ? NULL :
-    lisp_parse_list(ctx);
+  fprintf(stderr, "lookahead for right: %c\n", *ctx->source);
+  if(*ctx->source == ')') {
+    right = NULL;
+    ADVANCE(ctx);
+  } else {
+    right = lisp_parse_list(ctx);
+  }
+  fprintf(stderr, "parse list right: ");
+  lisp_print_expression(right, stderr);
+  fprintf(stderr, "\n");
   return make_lisp_cons(left, right);
 }
 

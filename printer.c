@@ -30,7 +30,14 @@ void lisp_print_expression(LispExpression *expression, FILE *stream) {
     lisp_print_expression(expression->value.quoted, stream);
     break;
   case LISP_FUNCTION:
-    fprintf(stream, "<procedure@0x%x>", (int)expression->value.function);
+    {
+      LispFunction f = expression->value.function;
+      if(NULL == f.definition) {
+        fprintf(stream, "<native-procedure@0x%x>", (int)f.native);
+      } else {
+        fprintf(stream, "<procedure@0x%x>", (int)f.definition);
+      }
+    }
     break;
   case LISP_EXCEPTION:
     fprintf(stream, "Uncaught exception: %s (%s)\n",

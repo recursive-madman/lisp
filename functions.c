@@ -45,14 +45,7 @@ LISP_F(cdr) {
 }
 
 LISP_F(set) {
-  LispExpression *s = CAR(args);
-  LispExpression *v = CAR(CDR(args));
-  LISP_ASSERT_TYPE(s, LISP_SYMBOL);
-  LispExpression *old_symbols = ctx->symbols;
-  ctx->symbols = lisp_alist_add(old_symbols, s->value.symbol, v);
-  LISP_REF(ctx->symbols);
-  LISP_UNREF(old_symbols);
-  return v;
+  return lisp_context_set(ctx, CAR(args), CADR(args));
 };
 
 LISP_F(eq) {

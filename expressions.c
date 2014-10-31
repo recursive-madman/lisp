@@ -74,10 +74,16 @@ LispExpression *make_lisp_quote(LispExpression *quoted) {
   MakeLisp(QUOTE, quoted, quoted);
 }
 
-LispExpression *make_lisp_function(LispFunction function) {
+LispExpression *make_lisp_function(LispExpression *definition) {
+  LispFunction function = { lisp_evaluate_function, definition };
+  LISP_REF(definition);
   MakeLisp(FUNCTION, function, function);
 }
 
+LispExpression *make_lisp_function_native(LispNativeFunction native) {
+  LispFunction function = { native, NULL };
+  MakeLisp(FUNCTION, function, function);
+}
 
 int lisp_eq(LispExpression *a, LispExpression *b) {
   if(a == NULL && b == NULL) {

@@ -31,6 +31,42 @@ void lisp_trace_pop() {
   free(lisp_trace[--lisp_trace_index]);
 }
 
+LispExpression *lisp_current_definition = NULL;
+
+LispExpression *lisp_evaluate_function(LispExpression *args,
+                                       LispContext *ctx) {
+  LispExpression *arg_names = CAR(lisp_current_definition);
+  LispExpression *body = CDR(lisp_current_definition);
+  // FIXME: this will leak, when an exception is thrown.
+  // SOLUTION: lisp_exc_env should be a stack. then we can save context
+  //   here to clean up after us, yet still be able to return to where
+  //   it pointed previously.
+  LispContext *inner = lisp_context_create(ctx);
+  for(LispExpression *rest_names = arg_names, *rest = args, *name, *arg;
+      NULL != rest_names;
+      rest_names = CDR(rest_names), rest = CDR(args)) {
+    name = CAR(rest_names);
+    arg = CAR(rest);
+    LISP_ASSERT_TYPE(name, LISP_SYMBOL);
+    if(NULL != rest_names && NULL == rest) {
+      LispThrow("ArgumentError", "Expected more arguments, but none given!");
+    }
+    LISP_REF(name);
+    LISP_REF(arg);
+    lisp_context_set(inner, name, arg);
+  }
+  LispExpression *result;
+  for(LispExpression *statement = CAR(body), *rest = CDR(body);;
+      statement = CAR(rest), rest = CDR(rest)) {
+    result = lisp_evaluate(statement, inner);
+    if(rest == NULL) {
+      break;
+    }
+  }
+  // TODO: unref context etc...
+  return result;
+}
+
 LispExpression *lisp_evaluate(LispExpression *expression,
                               LispContext *ctx) {
   if(NULL == expression) {
@@ -45,20 +81,29 @@ LispExpression *lisp_evaluate(LispExpression *expression,
     if(left->type != LISP_SYMBOL) {
       LispThrow("TypeError", "Expected symbol, got %s", LispTypeName(left));
     }
-    LispExpression *args = lisp_map(expression->value.cons.right,
-                                    lisp_evaluate, ctx);
-    LISP_REF(args);
-    LispExpression *f_expr = lisp_context_find(ctx, left->value.symbol);
-    if(NULL == f_expr || f_expr->type != LISP_FUNCTION) {
-      EvalError("Symbol %s isn't set to a function (type: %s)!",
-                left->value.symbol, LispTypeName(f_expr));
+    if(strcmp("lambda", left->value.symbol) == 0) {
+      LispExpression *args = CADR(expression);
+      LISP_ASSERT_TYPE(args, LISP_CONS);
+      LispExpression *body = CDDR(expression);
+      return make_lisp_function(make_lisp_cons(args, body));
+    } else {
+      LispExpression *args = lisp_map_native(expression->value.cons.right,
+                                             lisp_evaluate, ctx);
+      LISP_REF(args);
+      LispExpression *f_expr = lisp_context_find(ctx, left->value.symbol);
+      if(NULL == f_expr || f_expr->type != LISP_FUNCTION) {
+        EvalError("Symbol %s isn't set to a function (type: %s)!",
+                  left->value.symbol, LispTypeName(f_expr));
+      }
+      LispNativeFunction f = f_expr->value.function.native;
+      lisp_trace_push(left->value.symbol);
+      lisp_current_definition = f_expr->value.function.definition;
+      LispExpression *result = f(args, ctx);
+      lisp_current_definition = NULL;
+      LISP_UNREF(args);
+      lisp_trace_pop();
+      return result;
     }
-    LispFunction f = f_expr->value.function;
-    lisp_trace_push(left->value.symbol);
-    LispExpression *result = f(args, ctx);
-    LISP_UNREF(args);
-    lisp_trace_pop();
-    return result;
   } else if(expression->type == LISP_SYMBOL) {
     return lisp_context_find(ctx, expression->value.symbol);
   } else {

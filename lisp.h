@@ -32,13 +32,19 @@ extern char *lisp_type_names[LISP_TYPE_MAX];
 #define LispTypeName(expression)                \
   (expression ? lisp_type_names[expression->type] : "nil")
 
-typedef LispExpression *(*LispFunction)(LispExpression *args,
-                                        LispContext *ctx);
+typedef LispExpression *(*LispNativeFunction)(LispExpression *args,
+                                              LispContext *ctx);
+
+DeclareType(LispFunction, {
+    LispNativeFunction native;
+    LispExpression *definition;
+  });
 
 #define LISP_ASSERT_TYPE(e, t) {                                        \
     if(e->type != t) {                                                  \
       fprintf(stderr,                                                   \
-              "Lisp type incorrect! Expected %s, got %s instead!\n",    \
+              "%s:%d: Lisp type incorrect! Expected %s, got %s instead!\n", \
+              __FILE__, __LINE__,                                       \
               lisp_type_names[t], lisp_type_names[e->type]);            \
       abort();                                                          \
     }                                                                   \
@@ -47,13 +53,13 @@ typedef LispExpression *(*LispFunction)(LispExpression *args,
 #define CAR(cell) cell->value.cons.left
 #define CDR(cell) cell->value.cons.right
 #define CADR(cell) CAR(CDR(cell))
+#define CDDR(cell) CDR(CDR(cell))
 
 // exception handling
 extern jmp_buf lisp_exc_env;
 extern char *lisp_trace[];
 extern int lisp_trace_index;
 extern LispExpression *lisp_current_exception;
-
 
 DeclareType(LispCons, {
     LispExpression *left;
@@ -83,6 +89,7 @@ DeclareType(LispExpression, {
 
 DeclareType(LispContext, {
     LispExpression *symbols; // this is an alist
+    LispContext *parent;
   });
 
 #define LISP_REF(expr)                                        \
@@ -108,7 +115,8 @@ LispExpression *make_lisp_string(char *string);
 LispExpression *make_lisp_symbol(char *symbol);
 LispExpression *make_lisp_cons(LispExpression *left, LispExpression *right);
 LispExpression *make_lisp_quote(LispExpression *quoted);
-LispExpression *make_lisp_function(LispFunction function);
+LispExpression *make_lisp_function_native(LispNativeFunction function);
+LispExpression *make_lisp_function(LispExpression *definition);
 LispExpression *make_lisp_exception(char *name, char *message, ...);
 
 int lisp_eq(LispExpression *a, LispExpression *b);
@@ -119,13 +127,17 @@ void destroy_lisp(LispExpression *exp);
 LispExpression *lisp_parse(char *source);
 
 // context
-LispContext *lisp_context_create();
+LispContext *lisp_context_create(LispContext *parent);
 LispExpression *lisp_context_find(LispContext *ctx, char *symbol);
+LispExpression *lisp_context_set(LispContext *ctx, LispExpression *symbol,
+                                 LispExpression *value);
 void lisp_context_declare_function(LispContext *ctx, char *symbol,
-                                   LispFunction function);
+                                   LispNativeFunction function);
 // evaluator
 LispExpression *lisp_evaluate(LispExpression *expression,
                               LispContext *ctx);
+LispExpression *lisp_evaluate_function(LispExpression *expression,
+                                       LispContext *ctx);
 void lisp_throw(LispExpression *exc);
 
 // alist
@@ -137,8 +149,8 @@ LispExpression *lisp_alist_add(LispExpression *alist, char *symbol,
 void alist_inspect(LispExpression *alist, FILE *stream);
 
 // higher
-LispExpression *lisp_map(LispExpression *list, LispFunction mapper,
-                         LispContext *ctx);
+LispExpression *lisp_map_native(LispExpression *list, LispNativeFunction mapper,
+                                LispContext *ctx);
 
 // printer
 void lisp_print_expression(LispExpression *expression, FILE *stream);
