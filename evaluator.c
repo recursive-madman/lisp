@@ -86,6 +86,18 @@ LispExpression *lisp_evaluate(LispExpression *expression,
       LISP_ASSERT_TYPE(args, LISP_CONS);
       LispExpression *body = CDDR(expression);
       return make_lisp_function(make_lisp_cons(args, body));
+    } else if(strcmp("cond", left->value.symbol) == 0) {
+      for(LispExpression *clause = CADR(expression), *rest = CDDR(expression);
+          clause != NULL;
+          clause = rest ? CAR(rest) : NULL, rest = rest ? CDR(rest) : NULL) {
+        LispExpression *condition = CAR(clause);
+        if(CDR(clause) == NULL) {
+          return lisp_evaluate(condition, ctx);
+        } else if(NULL != lisp_evaluate(condition, ctx)) {
+          return lisp_evaluate(CADR(clause), ctx);
+        }
+      }
+      return NULL;
     } else {
       LispExpression *args = lisp_map_native(expression->value.cons.right,
                                              lisp_evaluate, ctx);
