@@ -78,6 +78,25 @@ LISP_F(parse) {
   return lisp_parse(source->value.string);
 }
 
+LISP_F(print) {
+  if(NULL == args) {
+    return NULL;
+  }
+  LispExpression *arg = CAR(args), *rest = CDR(args);
+  if(arg->type == LISP_STRING) {
+    printf("%s", arg->value.string);
+  } else {
+    lisp_print_expression(arg, stdout);
+  }
+  if(NULL != rest) {
+    printf(" ");
+    return lisp_f_print(rest, ctx);
+  } else {
+    printf("\n");
+    return NULL;
+  }
+}
+
 void lisp_install_functions(LispContext *ctx) {
   lisp_context_declare_function(ctx, "+", lisp_f_add);
   lisp_context_declare_function(ctx, "-", lisp_f_sub);
@@ -89,7 +108,8 @@ void lisp_install_functions(LispContext *ctx) {
   lisp_context_declare_function(ctx, "set", lisp_f_set);
   lisp_context_declare_function(ctx, "eq", lisp_f_eq);
   lisp_context_declare_function(ctx, "eval", lisp_f_eval);
+  lisp_context_declare_function(ctx, "inspect-state", lisp_f_inspect_state);
   lisp_context_declare_function(ctx, "typeof", lisp_f_typeof);
   lisp_context_declare_function(ctx, "parse", lisp_f_parse);
-  lisp_context_declare_function(ctx, "inspect-state", lisp_f_inspect_state);
+  lisp_context_declare_function(ctx, "print", lisp_f_print);
 }
