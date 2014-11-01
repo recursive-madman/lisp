@@ -11,14 +11,16 @@
 #define EvalError(...)                                              \
   LispThrow("EvaluationError", __VA_ARGS__)
 
-char *lisp_trace[1024];
+#define TRACE_LIMIT 1024
+
+char *lisp_trace[TRACE_LIMIT];
 int lisp_trace_index = 0;
 LispExpression *lisp_current_exception;
 
 jmp_buf lisp_exc_env;
 
 void lisp_trace_push(char *symbol) {
-  if(lisp_trace_index == 1023) {
+  if(lisp_trace_index == (TRACE_LIMIT - 1)) {
     lisp_throw(make_lisp_exception("StackError", "Stack level too deep!"));
   }
   lisp_trace[lisp_trace_index++] = strdup(symbol);
