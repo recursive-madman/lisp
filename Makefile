@@ -1,8 +1,14 @@
 
 CFLAGS = --std=c99 -ggdb -Wall -Werror -I.
-LDFLAGS = -ggdb
+LDFLAGS = -ggdb -lreadline
 OBJECTS = parser.o evaluator.o printer.o repl.o expressions.o functions.o \
   context.o alist.o higher.o
 
-main: main.o $(OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $< $(OBJECTS)
+lisp: main.o $(OBJECTS)
+	$(CC) -o $@ $< $(OBJECTS) $(LDFLAGS)
+
+clean:
+	rm -f lisp *.o *~
+
+.PHONY: clean
+

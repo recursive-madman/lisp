@@ -1,18 +1,32 @@
 
 #include <stdio.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 #include "lisp.h"
 
-#define PROMPT(out)                             \
-  fprintf(out, "(%d)> ", lisp_count)
+#define UPDATE_PROMPT(buf)                      \
+  snprintf(buf, 128, "(%d)> ", lisp_count)
 
 void lisp_repl(LispContext *ctx, FILE *in, FILE *out) {
-  char buf[1024];
-  PROMPT(out);
+  char prompt[128];
+  UPDATE_PROMPT(prompt);
   LispExpression *input, *output;
-  while(NULL != fgets(buf, 1024, in)) {
+  char *line = NULL;
+  for(;;) {
+    if(NULL != line) {
+      free(line);
+    }
+    line = readline(prompt);
+    if(NULL == line) {
+      fprintf(out, "\n"); // C-d shouldn't mess up the shell prompt.
+      break;
+    }
+    if(*line) { // not empty.
+      add_history(line); // yay!
+    }
     LISP_MDBG("-- START PARSE --\n");
-    input = lisp_parse(buf);    
+    input = lisp_parse(line);
     LISP_MDBG("-- END PARSE --\n");
     LISP_REF(input);
     LISP_MDBG("-- START EVAL --\n");
@@ -21,7 +35,7 @@ void lisp_repl(LispContext *ctx, FILE *in, FILE *out) {
       lisp_print_expression(lisp_current_exception, out);
       lisp_trace_index = 0;
       LISP_UNREF(lisp_current_exception);
-      PROMPT(out);
+      UPDATE_PROMPT(prompt);
       continue;
     }
     output = lisp_evaluate(input, ctx);
@@ -33,6 +47,6 @@ void lisp_repl(LispContext *ctx, FILE *in, FILE *out) {
     LISP_MDBG("-- END PRINT --\n");
     LISP_UNREF(output);
     fprintf(out, "\n");
-    PROMPT(out);
+    UPDATE_PROMPT(prompt);
   }
 }
