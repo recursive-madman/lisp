@@ -1,0 +1,31 @@
+
+This is (as you probably guessed) a Lisp interpreter.
+
+Current language features are as follows:
+
+* Four data types,
+
+  three types of atoms:
+    * numbers -- like 1, 2, 3 (i.e. only integers)
+    * symbols -- like `foo', `bar', ..
+    * strings -- like the infamous "Hello world !"
+
+  and the fourth being (immutable) cons cells.
+
+* Two special forms:
+
+  * lambda -- creates a function
+  * cond   -- branches by evaluating conditions
+
+* Exceptions (but no way to catch them)
+
+* An _extensive_ set of builtin functions:
+
+  * as many as four (!) arithmetic integer operations (+, -, *, /)
+  * parse -- parses a string into an expression
+  * eval  -- evaluates an expression
+  * print -- prints an expression to stdout, followed by a line break
+
+* An impressive collection of memory leaks.
+
+* No tail recursion.
