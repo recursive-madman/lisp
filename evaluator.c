@@ -53,11 +53,10 @@ LispExpression *lisp_evaluate_function(LispExpression *args,
     if(NULL != rest_names && NULL == rest) {
       LispThrow("ArgumentError", "Expected more arguments, but none given!");
     }
-    LISP_REF(name);
-    LISP_REF(arg);
+    /* LISP_REF(name); */
+    /* LISP_REF(arg); */
     lisp_context_set(inner, name, arg);
   }
-  LISP_REF(inner->symbols);
   LispExpression *result = NULL;
   if(NULL != body) {
     for(LispExpression *statement = CAR(body), *rest = CDR(body);;
@@ -70,8 +69,7 @@ LispExpression *lisp_evaluate_function(LispExpression *args,
       }
     }
   }
-  LISP_UNREF(inner->symbols);
-  // TODO: unref context etc...
+  lisp_context_destroy(inner);
   return result;
 }
 

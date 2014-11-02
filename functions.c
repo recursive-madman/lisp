@@ -101,6 +101,21 @@ LISP_F(print) {
   }
 }
 
+/* LISP_F(load) { */
+/*   LispExpression *filename = CAR(args); */
+/*   LISP_ASSERT_TYPE(filename, LISP_STRING); */
+/*   FILE *f = fopen(filename->value.string, "r"); */
+/*   if(NULL == f) { */
+/*     lisp_throw("LoadError", "File not found: %s", filename->value.string); */
+/*     return NULL; */
+/*   } else { */
+/*     // TODO: read entire file content into buffer, parse while we can, */
+/*     //   then evaluate each expression. */
+/*     //   Return value of the last expression. */
+/*     return NULL; */
+/*   } */
+/* } */
+
 void lisp_install_functions(LispContext *ctx) {
   lisp_context_declare_function(ctx, "+", lisp_f_add);
   lisp_context_declare_function(ctx, "-", lisp_f_sub);

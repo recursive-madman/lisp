@@ -9,6 +9,8 @@
 extern int mdbg_depth;
 
 #ifdef LISP_DEBUG_MEMORY
+void mdbg_init(int n);
+void mdbg_done();
 # define LISP_MDBG(...) {                       \
     for(int _mdb=0;_mdb<mdbg_depth;_mdb++) {    \
       fprintf(stderr, "  ");                    \
@@ -134,6 +136,7 @@ LispExpression *lisp_parse(char *source);
 
 // context
 LispContext *lisp_context_create(LispContext *parent);
+void lisp_context_destroy(LispContext *ctx);
 LispExpression *lisp_context_find(LispContext *ctx, char *symbol);
 LispExpression *lisp_context_set(LispContext *ctx, LispExpression *symbol,
                                  LispExpression *value);

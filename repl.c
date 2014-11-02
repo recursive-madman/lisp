@@ -13,7 +13,14 @@ void lisp_repl(LispContext *ctx, FILE *in, FILE *out) {
   UPDATE_PROMPT(prompt);
   LispExpression *input, *output;
   char *line = NULL;
+# ifdef LISP_DEBUG_MEMORY
+  int i = 1;
+# endif
   for(;;) {
+#   ifdef LISP_DEBUG_MEMORY
+    mdbg_init(i);
+    i++;
+#   endif
     if(NULL != line) {
       free(line);
     }

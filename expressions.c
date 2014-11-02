@@ -6,10 +6,34 @@
 int lisp_count = 0;
 int mdbg_depth = 0;
 
-#define MakeLisp(lisp_type, name, val)          \
-  Allocate(LispExpression, expression);         \
+#ifdef LISP_DEBUG_MEMORY
+FILE *mdbg_create = NULL, *mdbg_destroy = NULL;
+void mdbg_init(int n) {
+  if(NULL != mdbg_create) mdbg_done();
+  char buf[100];
+  sprintf(buf, "mdbg-create-%d", n);
+  mdbg_create = fopen(buf, "w");
+  sprintf(buf, "mdbg-destroy-%d", n);
+  mdbg_destroy = fopen(buf, "w");
+}
+void mdbg_done() {
+  fclose(mdbg_create);
+  fclose(mdbg_destroy);
+}
+# define LISP_MDBG_CREATE(type, exp)            \
+  fprintf(mdbg_create, "%s 0x%x\n", lisp_type_names[type], (int) exp)
+# define LISP_MDBG_DESTROY(type, exp)           \
+  fprintf(mdbg_destroy, "%s 0x%x\n", lisp_type_names[type], (int) exp)
+#else
+# define LISP_MDBG_CREATE(type, exp)
+# define LISP_MDBG_DESTROY(type, exp)
+#endif
+
+#define MakeLisp(lisp_type, name, val)            \
+  Allocate(LispExpression, expression);           \
   LISP_MDBG("CREATE " __STRING(lisp_type)         \
             " (0x%x)\n", (int)expression);        \
+  LISP_MDBG_CREATE(LISP_ ## lisp_type, expression); \
   lisp_count++;                                 \
   expression->type = LISP_ ## lisp_type;        \
   expression->value.name = val;                 \
@@ -25,6 +49,7 @@ void destroy_lisp(LispExpression *exp) {
   lisp_print_expression(exp, stderr);
   fprintf(stderr, " (0x%x)\n", (int)exp);
   mdbg_depth++;
+  LISP_MDBG_DESTROY(exp->type, exp);
 # endif
   lisp_count--;
   switch(exp->type) {
