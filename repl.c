@@ -8,8 +8,12 @@
 #define UPDATE_PROMPT(buf)                      \
   snprintf(buf, 128, "(%d)> ", lisp_count)
 
+char *readmore(void *prompt) {
+  return readline((char*)prompt);
+}
+
 void lisp_repl(LispContext *ctx, FILE *in, FILE *out) {
-  char prompt[128];
+  char prompt[128], *continuation_prompt = "      > ";
   UPDATE_PROMPT(prompt);
   LispExpression *input, *output;
   char *line = NULL;
@@ -33,7 +37,7 @@ void lisp_repl(LispContext *ctx, FILE *in, FILE *out) {
       add_history(line); // yay!
     }
     LISP_MDBG("-- START PARSE --\n");
-    input = lisp_parse(line);
+    input = lisp_parse_multi(line, readmore, continuation_prompt);
     LISP_MDBG("-- END PARSE --\n");
     LISP_REF(input);
     LISP_MDBG("-- START EVAL --\n");
