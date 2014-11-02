@@ -29,7 +29,11 @@ LISP_F_ARITHMETIC(mul, *, 1);
 LISP_F_ARITHMETIC(div, /, 1);
 
 LISP_F(cons) {
-  return make_lisp_cons(CAR(args), CADR(args));
+  if(NULL == args) {
+    return make_lisp_cons(NULL, NULL);
+  } else {
+    return make_lisp_cons(CAR(args), CDR(args) ? CADR(args) : NULL);
+  }
 }
 
 LISP_F(car) {
