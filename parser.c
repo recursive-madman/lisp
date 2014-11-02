@@ -85,8 +85,12 @@ LispExpression *lisp_parse_string(LispParseContext *ctx) {
   StringParseSetup(string);
   while(*ctx->source != '"' || escape) {
     ASSERT_NO_EOF(ctx);
-    StringParseChar(string, *ctx->source);
-    escape = (*ctx->source == '\\' && !escape) ? 1 : 0;
+    if(*ctx->source == '\\' && !escape) {
+      escape = 1;
+    } else {
+      StringParseChar(string, *ctx->source);
+      escape = 0;
+    }
     if(*ctx->source == '\n') ADVANCE_LINE(ctx) else ADVANCE(ctx);
     StringParseCheck(string);
   }
