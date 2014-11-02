@@ -8,7 +8,18 @@ lisp: main.o $(OBJECTS)
 	$(CC) -o $@ $< $(OBJECTS) $(LDFLAGS)
 
 clean:
-	rm -f lisp *.o *~
+	rm -f lisp *.o *~ test/*.o test/*~
+
+test: clean test/parser test/evaluator
+	@test/parser
+	@test/evaluator
+	@rm -f test/{parser,evaluator}
+
+test/parser: test/parser-test.o $(OBJECTS)
+	$(CC) -o $@ $< $(OBJECTS) $(LDFLAGS)
+
+test/evaluator: test/evaluator-test.o $(OBJECTS)
+	$(CC) -o $@ $< $(OBJECTS) $(LDFLAGS)
 
 .PHONY: clean
 

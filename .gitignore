@@ -1,4 +1,5 @@
 *~
 *.o
 lisp
-
+test/parser
+test/evaluator
