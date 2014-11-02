@@ -45,7 +45,7 @@ LispExpression *lisp_evaluate_function(LispExpression *args,
   //   it pointed previously.
   LispContext *inner = lisp_context_create(ctx);
   for(LispExpression *rest_names = arg_names, *rest = args, *name, *arg;
-      NULL != rest_names;
+      NULL != rest_names && NULL != rest;
       rest_names = CDR(rest_names), rest = CDR(args)) {
     name = CAR(rest_names);
     arg = CAR(rest);
@@ -57,14 +57,20 @@ LispExpression *lisp_evaluate_function(LispExpression *args,
     LISP_REF(arg);
     lisp_context_set(inner, name, arg);
   }
-  LispExpression *result;
-  for(LispExpression *statement = CAR(body), *rest = CDR(body);;
-      statement = CAR(rest), rest = CDR(rest)) {
-    result = lisp_evaluate(statement, inner);
-    if(rest == NULL) {
-      break;
+  LISP_REF(inner->symbols);
+  LispExpression *result = NULL;
+  if(NULL != body) {
+    for(LispExpression *statement = CAR(body), *rest = CDR(body);;
+        statement = CAR(rest), rest = CDR(rest)) {
+      result = lisp_evaluate(statement, inner);
+      if(rest == NULL) {
+        break;
+      } else {
+        LISP_SAFE_DESTROY(result);
+      }
     }
   }
+  LISP_UNREF(inner->symbols);
   // TODO: unref context etc...
   return result;
 }
@@ -85,7 +91,9 @@ LispExpression *lisp_evaluate(LispExpression *expression,
     }
     if(strcmp("lambda", left->value.symbol) == 0) {
       LispExpression *args = CADR(expression);
-      LISP_ASSERT_TYPE(args, LISP_CONS);
+      if(NULL != args) {
+        LISP_ASSERT_TYPE(args, LISP_CONS);
+      }
       LispExpression *body = CDDR(expression);
       return make_lisp_function(make_lisp_cons(args, body));
     } else if(strcmp("cond", left->value.symbol) == 0) {
@@ -93,9 +101,11 @@ LispExpression *lisp_evaluate(LispExpression *expression,
           clause != NULL;
           clause = rest ? CAR(rest) : NULL, rest = rest ? CDR(rest) : NULL) {
         LispExpression *condition = CAR(clause);
+        LispExpression *cond_result = lisp_evaluate(condition, ctx);
         if(CDR(clause) == NULL) {
-          return lisp_evaluate(condition, ctx);
-        } else if(NULL != lisp_evaluate(condition, ctx)) {
+          return cond_result;
+        } else if(NULL != cond_result) {
+          LISP_SAFE_DESTROY(cond_result);
           return lisp_evaluate(CADR(clause), ctx);
         }
       }

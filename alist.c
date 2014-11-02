@@ -28,8 +28,7 @@ LispExpression *lisp_alist_find(LispExpression *alist, char *symbol) {
 
 void alist_inspect(LispExpression *alist, FILE *stream) {
   if(NULL != alist) {
-    LispExpression *key = CAR(CAR(alist));
-    LispExpression *value = CDR(CAR(alist));
+    LispExpression *key = CAAR(alist), *value = CDAR(alist);
     if(key->type != LISP_SYMBOL) {
       fprintf(stream, " NO SYMBOL (but %s) -> ", LispTypeName(key));
     } else {

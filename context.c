@@ -12,6 +12,11 @@ LispContext *lisp_context_create(LispContext *parent) {
   return ctx;
 }
 
+void lisp_context_destroy(LispContext *ctx) {
+  LISP_UNREF(ctx->symbols);
+  free(ctx);
+}
+
 void lisp_context_declare_function(LispContext *ctx, char *symbol,
                                    LispNativeFunction function) {
   LispExpression *old_symbols = ctx->symbols;

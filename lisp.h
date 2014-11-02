@@ -53,6 +53,8 @@ DeclareType(LispFunction, {
 #define CDR(cell) cell->value.cons.right
 #define CADR(cell) CAR(CDR(cell))
 #define CDDR(cell) CDR(CDR(cell))
+#define CAAR(cell) CAR(CAR(cell))
+#define CDAR(cell) CDR(CAR(cell))
 
 // exception handling
 extern jmp_buf lisp_exc_env;
@@ -91,6 +93,13 @@ DeclareType(LispContext, {
     LispContext *parent;
   });
 
+#define LISP_SAFE_DESTROY(expr) {               \
+    if(expr->ref == 0) {                        \
+      destroy_lisp(expr);                       \
+    }                                           \
+  }
+
+
 #define LISP_REF(expr)                                        \
   if(NULL != expr) {                                          \
     expr->ref++;                                              \
@@ -101,9 +110,7 @@ DeclareType(LispContext, {
   if(NULL != expr) {                                            \
     expr->ref--;                                                \
     LISP_MDBG("UNREF 0x%x (%d)\n", (int)expr, expr->ref);       \
-    if(expr->ref == 0) {                                        \
-      destroy_lisp(expr);                                       \
-    }                                                           \
+    LISP_SAFE_DESTROY(expr);                                    \
   }
 
 extern int lisp_count; // number of allocated objects.
