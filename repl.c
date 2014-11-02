@@ -12,7 +12,7 @@ char *readmore(void *prompt) {
   return readline((char*)prompt);
 }
 
-void lisp_repl(LispContext *ctx, FILE *in, FILE *out) {
+void lisp_repl(LispContext *ctx, FILE *out) {
   char prompt[128], *continuation_prompt = "      > ";
   UPDATE_PROMPT(prompt);
   LispExpression *input, *output;

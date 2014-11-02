@@ -167,7 +167,7 @@ LispExpression *lisp_map_native(LispExpression *list, LispNativeFunction mapper,
 void lisp_print_expression(LispExpression *expression, FILE *stream);
 
 // repl
-void lisp_repl(LispContext *ctx, FILE *in, FILE *out);
+void lisp_repl(LispContext *ctx, FILE *out);
 
 // functions
 void lisp_install_functions(LispContext *ctx);
