@@ -140,7 +140,14 @@ LispExpression *lisp_parse_expression(LispParseContext *ctx) {
     break;
   case '\'':
     ADVANCE(ctx);
-    return make_lisp_quote(lisp_parse_expression(ctx));
+    {
+      LispExpression *quoted = lisp_parse_expression(ctx);
+      if(NULL == quoted) {
+        return NULL;
+      } else {
+        return make_lisp_quote(quoted);
+      }
+    }
   case '(':
     ADVANCE(ctx);
     return lisp_parse_list(ctx);
