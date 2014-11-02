@@ -50,6 +50,7 @@ LispExpression *lisp_parse_expression(LispParseContext *ctx);
 
 LispExpression *lisp_parse_list(LispParseContext *ctx) {
   if(*ctx->source == ')') {
+    ADVANCE(ctx);
     return NULL;
   }
   LispExpression *left, *right;
