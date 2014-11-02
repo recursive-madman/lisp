@@ -3,14 +3,16 @@ This is (as you probably guessed) a Lisp interpreter.
 
 Current language features are as follows:
 
-* Four data types,
+* Five data types,
 
   three types of atoms:
     * numbers -- like 1, 2, 3 (i.e. only integers)
     * symbols -- like `foo', `bar', ..
     * strings -- like the infamous "Hello world !"
 
-  and the fourth being (immutable) cons cells.
+  two container types:
+    * cons cells    -- like (1 2)
+    * quoted values -- like 'foo
 
 * Two special forms:
 
@@ -22,10 +24,19 @@ Current language features are as follows:
 * An _extensive_ set of builtin functions:
 
   * as many as four (!) arithmetic integer operations (+, -, *, /)
-  * parse -- parses a string into an expression
-  * eval  -- evaluates an expression
-  * print -- prints an expression to stdout, followed by a line break
+  * parse  -- parses a string into an expression
+  * eval   -- evaluates an expression
+  * print  -- prints an expression to stdout, followed by a line break
+  * set    -- sets a symbol's value in the current symbol table
+  * eq     -- checks if two things are equal
+  * cons   -- creates a cons cell
+  * car    -- returns the first value of a cons cell
+  * cdr    -- returns the second value of a cons cell
+  * typeof -- returns the type of a given thing as a symbol, i.e. one
+              of: number, symbol, string, cons, quote, function
 
 * An impressive collection of memory leaks.
 
 * No tail recursion.
+
+See MANUAL for details.
