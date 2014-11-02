@@ -1,0 +1,286 @@
+
+A Sane Man's Lisp Manual
+========================
+
+
+I - What is the Lisp?
+---------------------
+
+As any modern dictionary should be able to tell you (most however won't),
+"lisp" is the short form for "list processor". A list processor is something
+that processes lists -- pretty neat, huh?
+
+However, a Lisp is a lot more than that. It actually is a processor for
+a Turing complete language which -- incidentally -- is also called Lisp.
+
+(If you don't know what Turing complete means, don't worry. It's just a
+    fancy way of saying that the Lisp can compute partial recursive
+    functions. (If you don't know what partial recursive functions are,
+                   don't worry. It's just a fancy way of saying that the
+                   Lisp is Turing complete. (If you feel you're stuck in a
+                                                strange loop, don't worry.
+                                                This manual is not Turing
+                                                complete.)))
+
+
+II - Starting the Lisp
+----------------------
+
+Assuming that you have some UNIX box at hand, successfully compiled the
+Lisp, and know how to deal with your terminal, this one is easy:
+
+  ./lisp
+
+You'll be greeted with something that looks like this:
+
+  (56)>
+
+This is called the "prompt". It gives you two pieces of information:
+
+  1) The Lisp (probably) hasn't crashed yet.
+
+  2) The number of objects that have been allocated by the Lisp.
+     (in this case 56)
+
+Why the Lisp dared to allocate objects already will become clear later.
+
+
+III - Interacting with the Lisp
+-------------------------------
+
+Interaction with the Lisp is done in three steps:
+
+  1) Enter a sequence of zero or more characters.
+  2) Press the 0x0A key (sometimes mysteriously labeled <ENTER> or ↵ instead)
+  3) Wait for the Lisp to reply.
+
+Since one list of three things is boring, the reply can also be one of
+three things:
+
+  1) The sequence of characters evaluates to some value, which the Lisp
+     prints to the terminal.
+  2) Some error occured, which the Lisp also prints to the terminal.
+  3) The Lisp crashes, in which case it will be likely not to print
+     anything to the terminal (your operating system might however).
+
+Here is what a Lisp session might look like that goes through all of the
+three options in order:
+
+  1) Adding the numbers 1 and 2:
+
+    (56)> (+ 1 2)
+    3
+
+  2) Dividing the number 7 by a string:
+
+    (56)> (/ 7 "boh!")
+    Uncaught exception: Expected number, got string instead. (TypeError)
+      in `/'
+
+  3) Dividing the number 7 by the number 0:
+
+    (60)> (/ 7 0)
+    Floating point exception (core dumped)
+
+
+An inconvenient consequence of causing the Lisp to crash, is that it won't
+accept any more input.
+Don't be discouraged though. It is easily solved:
+
+  simply return to section II.
+
+
+-- END OF MANUAL --
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- END OF END OF MANUAL --
+
+(I've run out of roman numerals and the empire has collapsed.
+      Numbering commences in greek.)
+
+α' The structure of Lisp: Types of data
+---------------------------------------
+
+All data in lisp is either of two things: atomic or compound.
+
+Despite recent developments in popular physics, Lisp atoms retain their
+indivisability.
+Atoms can further be categorized as being either numbers, symbols or strings.
+A number is any integer. Symbols and strings are character sequences.
+(the difference between symbols and strings is purely of a philosophical
+ nature and need not concern us now. However, since they are distinct types
+ of data, they cannot be used interchangably. There will be more about
+ strings and symbols in chapter γ')
+
+Compound data again can be one of two things: cons cells or quotes.
+A cons cell is a data structure that contains exactly two pieces of lisp
+data, which can again either be atomic or compound.
+A quote is a data structure that contains exactly one piece of lisp data,
+which can also be either atomic or compound.
+
+That is all there is to know about lisp data.
+
+
+β' The structure of Lisp: Syntax of data
+----------------------------------------
+
+Even though entirely irrelevant for the Lisp itself, for us people data is
+best represented in some visual form.
+To represent Lisp data, at this point we choose a textual form of
+representation.
+
+Now follows the definition of our representation for the data types
+described above, accompanied by examples.
+
+Numbers:
+  Numbers are represented - following comtemporary societal conventions - by
+  the digits 0, 1, 2, 3, 4, 5, 6, 7, 8 and 9.
+  A sequence of  digits are to be interpreted as being implicitly multiplied
+  by a power of 0x0a, where the power is determined by the offset of the
+  respective digit, counting from the _right_ side of the sequence.
+
+  Examples:
+
+    Lisp Representation |                 Meaning
+    --------------------|------------------------
+    3                   |                   3*A^0
+    17                  |             1*A^1+7*A^0
+    23                  |             2*A^1+3*A^0
+    1166                | 1*A^3+1*A^2+6*A^1+6*A^0
+
+  As the reader can clearly see, this representation takes up a lot less
+  space than the actual meaning of the number, at the cost of being rather
+  imprecise and less readable than the more natural version of hexadecimal
+  digits combined by arithmetic operations.
+
+Symbols:
+  The representation of a symbol is the symbol itself.
+  While this description is accurate, it's sole dependence on words may be a
+  bit confusing to the reader, so again, examples are in order.
+
+  Examples:
+
+    Lisp Representation |                 Meaning
+    --------------------|------------------------
+    foo                 |                     foo
+    bar                 |                     bar
+    goddess             |                 goddess
+
+
+  I hope that at least for some of the readers these examples proved useful.
+  Don't be discouraged if the representation of symbols is still unclear to
+  you. With a bit of practice you'll get used to it.
+
+Strings:
+  As the reader will learn in the next section, strings are a trancendental
+  form of data from the Lisp's point of view.
+  For people on the other hand, their meaning should be rather familiar.
+  As the following examples show, strings can represent everything a person
+  may say in a casual conversation.
+  (which is part of the reason why the Lisp cannot deal well with strings.
+   The Lisp has a different understanding of casual conversations after all.)
+
+  Examples:
+
+    Lisp Representation |                 Meaning
+    --------------------|------------------------
+    "Fuck off!"         |               Fuck off!
+    "Five tons of flax" |       Five tons of flax
+
+  Since clarity about the representation of strings will likely have been
+  reached by now, the apt reader may safely unread this sentence.
+
+Quotes:
+  To introduce a pinch of recursion to this manual, I will leave it at saying
+  that the representation of a quoted value is equal to the representation of
+  the value itself, preceded by a single quote.
+  (for those unfamiliar with the term "single quote", it is equal to 0x27.)
+
+Cons cells:
+  While a description of the representation of cons cells (which are quite
+  central to the understanding of Lisp) would be in order now, it will not be
+  provided, since the author believes that doing so would take a lot of
+  excitement out of the reading experience.
+
+
+γ' The structure of Lisp: Symbols vs Strings
+--------------------------------------------
+
