@@ -42,11 +42,10 @@ DeclareType(LispFunction, {
 
 #define LISP_ASSERT_TYPE(e, t) {                                        \
     if(e->type != t) {                                                  \
-      fprintf(stderr,                                                   \
-              "%s:%d: Lisp type incorrect! Expected %s, got %s instead!\n", \
-              __FILE__, __LINE__,                                       \
-              lisp_type_names[t], lisp_type_names[e->type]);            \
-      abort();                                                          \
+      lisp_throw(make_lisp_exception("TypeError",                       \
+                                     "Expected %s, got %s instead.",    \
+                                     lisp_type_names[t],                \
+                                     lisp_type_names[e->type]));        \
     }                                                                   \
   }
 
