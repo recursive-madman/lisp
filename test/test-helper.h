@@ -36,4 +36,14 @@
     ASSERT_FAILED(buf);                           \
   }
 
+#define ASSERT_NUMBER(exp, n)                   \
+  ASSERT(exp);                                  \
+  ASSERT_EQUAL(LISP_NUMBER, exp->type);         \
+  ASSERT_EQUAL(n, exp->value.number)
+
+#define ASSERT_SYMBOL(exp, s)                     \
+  ASSERT(exp);                                    \
+  ASSERT_EQUAL(LISP_SYMBOL, exp->type);           \
+  ASSERT_EQUAL_STRING(s, exp->value.symbol)
+
 #endif

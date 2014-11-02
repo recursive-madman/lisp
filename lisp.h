@@ -133,6 +133,8 @@ void destroy_lisp(LispExpression *exp);
 
 // parser
 LispExpression *lisp_parse(char *source);
+LispExpression *lisp_parse_multi(char *source, char *(*readmore)(void *),
+                                 void *readmore_context);
 
 // context
 LispContext *lisp_context_create(LispContext *parent);

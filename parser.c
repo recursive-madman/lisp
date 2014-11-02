@@ -5,6 +5,8 @@ DeclareType(LispParseContext, {
     char *source;
     int line;
     int col;
+    char *(*readmore)(void *);
+    void *readmore_context;
   });
 
 #define ParseError(...)                         \
@@ -25,10 +27,22 @@ DeclareType(LispParseContext, {
     ctx->col = 0;                               \
   }
 
+#define UNEXPECTED_EOF(ctx) {                                 \
+    ParseError("Unexpected EOF at %d:%d (called from %s:%d)", \
+               ctx->line, ctx->col, __FILE__, __LINE__);      \
+  }
+
+
 #define ASSERT_NO_EOF(ctx) {                                    \
     if(*ctx->source == 0) {                                     \
-      ParseError("Unexpected EOF at %d:%d (called from %s:%d)", \
-                 ctx->line, ctx->col, __FILE__, __LINE__);      \
+      if(NULL != ctx->readmore) {                               \
+        ctx->source = ctx->readmore(ctx->readmore_context);     \
+        if(NULL == ctx->source || *ctx->source == 0) {          \
+          UNEXPECTED_EOF(ctx);                                  \
+        }                                                       \
+      } else {                                                  \
+        UNEXPECTED_EOF(ctx);                                    \
+      }                                                         \
     }                                                           \
   }
 
@@ -166,7 +180,12 @@ LispExpression *lisp_parse_expression(LispParseContext *ctx) {
   return lisp_parse_expression(ctx);
 }
 
+LispExpression *lisp_parse_multi(char *source, char *(*readmore)(void *),
+                                 void *readmore_context) {
+  LispParseContext ctx = { source, 0, 0, readmore, readmore_context };
+  return lisp_parse_expression(&ctx);  
+}
+
 LispExpression *lisp_parse(char *source) {
-  LispParseContext ctx = { source, 0, 0 };
-  return lisp_parse_expression(&ctx);
+  return lisp_parse_multi(source, NULL, NULL);
 }

@@ -103,5 +103,29 @@ int main(int argc, char **argv) {
   ASSERT_EQUAL(NULL, CDR(CDDR(exp)));
   TEST_DONE();
 
+  TEST_GROUP("Multiline parser");
+
+  TEST_CASE("Parsing a partial list");
+
+  char *some_context = "blabla";
+  int x = 0;
+  char *continue_parsing(void *read_context) {
+    ASSERT_EQUAL(read_context, some_context);
+    if(x) {
+      return NULL;
+    } else {
+      x = 1;
+      return " bar)";
+    }
+  }
+  exp = lisp_parse_multi("(foo ", continue_parsing, some_context);
+  ASSERT(exp);
+  ASSERT_EQUAL(LISP_CONS, exp->type);
+  ASSERT_SYMBOL(CAR(exp), "foo");
+  ASSERT(CDR(exp));
+  ASSERT_SYMBOL(CADR(exp), "bar");
+  ASSERT_EQUAL(NULL, CDDR(exp));
+  TEST_DONE();
+
   return 0;
 }
