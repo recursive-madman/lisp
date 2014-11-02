@@ -35,7 +35,7 @@ Current language features are as follows:
   * typeof -- returns the type of a given thing as a symbol, i.e. one
               of: number, symbol, string, cons, quote, function
 
-* An impressive collection of memory leaks.
+* An impressive collection of memory leaks (DEPRECATED)
 
 * No tail recursion.
 
