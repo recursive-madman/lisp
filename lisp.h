@@ -37,6 +37,8 @@ extern char *lisp_type_names[LISP_TYPE_MAX];
 typedef LispExpression *(*LispNativeFunction)(LispExpression *args,
                                               LispContext *ctx);
 
+typedef void(*LispCallback)(LispExpression *args, LispContext *ctx);
+
 DeclareType(LispFunction, {
     LispNativeFunction native;
     LispExpression *definition;
@@ -93,12 +95,12 @@ DeclareType(LispExpression, {
   });
 
 DeclareType(LispContext, {
-    LispExpression *symbols; // this is an alist
+    SymbolTable *symbols;
     LispContext *parent;
   });
 
 #define LISP_SAFE_DESTROY(expr) {               \
-    if(expr->ref == 0) {                        \
+    if(NULL != expr && expr->ref == 0) {        \
       destroy_lisp(expr);                       \
     }                                           \
   }
@@ -169,7 +171,7 @@ LispExpression *lisp_map_native(LispExpression *list, LispNativeFunction mapper,
 void lisp_print_expression(LispExpression *expression, FILE *stream);
 
 // repl
-void lisp_repl(LispContext *ctx, FILE *out);
+void lisp_repl(LispContext *ctx, FILE *in, FILE *out);
 
 // functions
 void lisp_install_functions(LispContext *ctx);

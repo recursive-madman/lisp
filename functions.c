@@ -66,12 +66,6 @@ LISP_F(eval) {
   }
 }
 
-LISP_F(inspect_state) {
-  fprintf(stderr, "Symbols:\n");
-  alist_inspect(ctx->symbols, stderr);
-  return NULL;
-}
-
 LISP_F(typeof) {
   return make_lisp_symbol(strdup(LispTypeName(CAR(args))));
 }
@@ -127,7 +121,6 @@ void lisp_install_functions(LispContext *ctx) {
   lisp_context_declare_function(ctx, "set", lisp_f_set);
   lisp_context_declare_function(ctx, "eq", lisp_f_eq);
   lisp_context_declare_function(ctx, "eval", lisp_f_eval);
-  lisp_context_declare_function(ctx, "inspect-state", lisp_f_inspect_state);
   lisp_context_declare_function(ctx, "typeof", lisp_f_typeof);
   lisp_context_declare_function(ctx, "parse", lisp_f_parse);
   lisp_context_declare_function(ctx, "print", lisp_f_print);

@@ -1,7 +1,11 @@
 
+#define _GNU_SOURCE
+
+#include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <math.h>
+
 #include "symbol_table.h"
 
 typedef uint32_t hash_t;
@@ -44,6 +48,20 @@ SymbolTable *symbol_table_create(uint32_t size) {
   return tab;
 }
 
+void symbol_table_destroy(SymbolTable *tab, LispCallback cb, LispContext *ctx) {
+  for(int i = 0; i < tab->size; i++) {
+    for(SymbolTableEntry *entry = tab->entries[i], *next = NULL;
+        entry != NULL; entry = next) {
+      cb(entry->value, ctx);
+      free(entry->key);
+      next = entry->next;
+      free(entry);
+    }
+  }
+  free(tab->entries);
+  free(tab);
+}
+
 SymbolTableEntry *symbol_table_lookup_entry(SymbolTable *tab, char *key,
                                             hash_t hash, hash_t bucket) {
   for(SymbolTableEntry *entry = tab->entries[bucket];
@@ -65,7 +83,7 @@ LispExpression *symbol_table_add(SymbolTable *tab, char *key,
   if(NULL == entry) {
     entry = malloc(sizeof(SymbolTableEntry));
     entry->hash = hash;
-    entry->key = key;
+    entry->key = strdup(key);
     entry->value = value;
   } else {
     previous_value = entry->value;
@@ -76,10 +94,16 @@ LispExpression *symbol_table_add(SymbolTable *tab, char *key,
   return previous_value;
 }
 
-LispExpression *symbol_table_lookup(SymbolTable *tab, char *key) {
+LispExpression *symbol_table_lookup(SymbolTable *tab, char *key, int *found) {
   hash_t hash = string_hash(key);
   hash_t bucket = hash & tab->mask;
   SymbolTableEntry *entry;
   entry = symbol_table_lookup_entry(tab, key, hash, bucket);
-  return NULL != entry ? entry->value : NULL;
+  if(NULL != entry) {
+    *found = 1;
+    return entry->value;
+  } else {
+    *found = 0;
+    return NULL;
+  }
 }
