@@ -169,6 +169,9 @@ LispExpression *lisp_parse_expression(LispParseContext *ctx) {
   case '"':
     ADVANCE(ctx);
     return lisp_parse_string(ctx);
+  /* case ';': */
+  /*   while(*ctx->source != '\n') ADVANCE(ctx); */
+  /*   break; */
   default:
     if(c >= '0' && c <= '9') {
       return lisp_parse_number(ctx);

@@ -75,6 +75,11 @@ LispExpression *lisp_evaluate_function(LispExpression *args,
 
 LispExpression *lisp_evaluate(LispExpression *expression,
                               LispContext *ctx) {
+# if 0
+  fprintf(stderr, "Will evaluate: ");
+  lisp_print_expression(expression, stderr);
+  fprintf(stderr, "\n");
+# endif
   if(NULL == expression) {
     return NULL;
   } if(expression->type == LISP_QUOTE) {
