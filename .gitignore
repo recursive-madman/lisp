@@ -1,5 +1,6 @@
 *~
 *.o
 lisp
-test/parser
-test/evaluator
+test/*
+!test/*-test.c
+

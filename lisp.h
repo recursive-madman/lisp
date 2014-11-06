@@ -42,6 +42,8 @@ DeclareType(LispFunction, {
     LispExpression *definition;
   });
 
+#include "symbol_table.h"
+
 #define LISP_ASSERT_TYPE(e, t) {                                        \
     if(e->type != t) {                                                  \
       lisp_throw(make_lisp_exception("TypeError",                       \
